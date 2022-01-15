@@ -44,6 +44,10 @@ export default class Toolbox extends Module<ToolboxNodes> {
     return {
       toolbox: 'ce-toolbox',
       toolboxButton: 'ce-toolbox__button',
+      toolboxButtonIcon: 'ce-toolbox__button-icon',
+      toolboxButtonName: 'ce-toolbox__button-name',
+      toolboxButtonDescription: 'ce-toolbox__button-description',
+
       toolboxButtonActive: 'ce-toolbox__button--active',
       toolboxOpened: 'ce-toolbox--opened',
       openedToolbarHolderModifier: 'codex-editor--toolbox-opened',
@@ -216,7 +220,20 @@ export default class Toolbox extends Module<ToolboxNodes> {
     const button = $.make('li', [ this.CSS.toolboxButton ]);
 
     button.dataset.tool = toolName;
-    button.innerHTML = (userToolboxSettings && userToolboxSettings.icon) || toolToolboxSettings.icon;
+
+    const buttonIcon = $.make('span', [ this.CSS.toolboxButtonIcon ]);
+
+    buttonIcon.innerHTML = (userToolboxSettings && userToolboxSettings.icon) || toolToolboxSettings.icon;
+    const buttonName = $.make('span', [ this.CSS.toolboxButtonName ]);
+
+    buttonName.innerHTML = (userToolboxSettings && userToolboxSettings.name) || toolToolboxSettings.name;
+
+    const buttonDescription = $.make('span', [ this.CSS.toolboxButtonDescription ]);
+
+    buttonDescription.innerHTML = (userToolboxSettings && userToolboxSettings.description) || toolToolboxSettings.description;
+    button.append(buttonIcon);
+    button.append(buttonName);
+    button.append(buttonDescription);
 
     $.append(this.nodes.toolbox, button);
 
