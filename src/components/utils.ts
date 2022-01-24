@@ -2,6 +2,7 @@
  * Class Util
  */
 
+import { nanoid } from 'nanoid';
 import Dom from './dom';
 
 /**
@@ -608,6 +609,15 @@ export function getValidUrl(url: string): string {
 }
 
 /**
+ * Create a block id
+ *
+ * @returns {string}
+ */
+export function generateBlockId(): string {
+  return nanoid(10);
+}
+
+/**
  * Opens new Tab with passed URL
  *
  * @param {string} url - URL address to redirect
@@ -642,3 +652,53 @@ export function deprecationAssert(condition: boolean, oldProperty: string, newPr
     logLabeled(message, 'warn');
   }
 }
+
+/**
+ * Decorator which provides ability to cache method or accessor result
+ *
+ * @param target - target instance or constructor function
+ * @param propertyKey - method or accessor name
+ * @param descriptor - property descriptor
+ */
+export function cacheable<Target, Value, Arguments extends any[] = any[]>(
+  target: Target,
+  propertyKey: string,
+  descriptor: PropertyDescriptor
+): PropertyDescriptor {
+  const propertyToOverride = descriptor.value ? 'value' : 'get';
+  const originalMethod = descriptor[propertyToOverride];
+  const cacheKey = `#${propertyKey}Cache`;
+
+  /**
+   * Override get or value descriptor property to cache return value
+   *
+   * @param args
+   */
+  descriptor[propertyToOverride] = function (...args: Arguments): Value {
+    /**
+     * If there is no cache, create it
+     */
+    if (this[cacheKey] === undefined) {
+      this[cacheKey] = originalMethod.apply(this, ...args);
+    }
+
+    return this[cacheKey];
+  };
+
+  /**
+   * If get accessor has been overridden, we need to override set accessor to clear cache
+   *
+   * @param value
+   */
+  if (propertyToOverride === 'get' && descriptor.set) {
+    const originalSet = descriptor.set;
+
+    descriptor.set = function (value: any): void {
+      delete target[cacheKey];
+
+      originalSet.apply(this, value);
+    };
+  }
+
+  return descriptor;
+};
