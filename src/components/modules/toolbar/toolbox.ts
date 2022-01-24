@@ -225,18 +225,18 @@ export default class Toolbox extends Module<ToolboxNodes> {
 
     const button = $.make('li', [ this.CSS.toolboxButton ]);
 
-    button.dataset.tool = toolName;
+    button.dataset.tool = tool.name;
 
     const buttonIcon = $.make('span', [ this.CSS.toolboxButtonIcon ]);
 
-    buttonIcon.innerHTML = (userToolboxSettings && userToolboxSettings.icon) || toolToolboxSettings.icon;
+    buttonIcon.innerHTML = toolToolboxSettings.icon;
     const buttonName = $.make('span', [ this.CSS.toolboxButtonName ]);
 
-    buttonName.innerHTML = (userToolboxSettings && userToolboxSettings.name) || toolToolboxSettings.name;
+    buttonName.innerHTML = toolToolboxSettings.name;
 
     const buttonDescription = $.make('span', [ this.CSS.toolboxButtonDescription ]);
 
-    buttonDescription.innerHTML = (userToolboxSettings && userToolboxSettings.description) || toolToolboxSettings.description;
+    buttonDescription.innerHTML = toolToolboxSettings.description;
     button.append(buttonIcon);
     button.append(buttonName);
     button.append(buttonDescription);
