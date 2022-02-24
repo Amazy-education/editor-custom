@@ -210,8 +210,8 @@ export default class Toolbar extends Module<ToolbarNodes> {
     if (!isMobile) {
       const contentOffset = Math.floor(blockHeight / 2);
 
-      this.nodes.plusButton.style.transform = `translate3d(0, calc(${contentOffset}px - 50%), 0)`;
-      this.Editor.Toolbox.nodes.toolbox.style.transform = `translate3d(0, calc(${contentOffset}px - 50%), 0)`;
+      // this.nodes.plusButton.style.transform = `translate3d(0, calc(${contentOffset}px - 50%), 0)`;
+      // this.Editor.Toolbox.nodes.toolbox.style.transform = `translate3d(0, calc(${contentOffset}px - 50%), 0)`;
     } else {
       toolbarY += blockHeight;
     }

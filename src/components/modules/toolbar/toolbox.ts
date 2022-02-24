@@ -1,6 +1,7 @@
 import Module from '../../__module';
 import $ from '../../dom';
 import * as _ from '../../utils';
+import { BlockToolConstructable, ToolConstructable } from '../../../../types';
 import Flipper from '../../flipper';
 import { BlockToolAPI } from '../../block';
 import I18n from '../../i18n';
@@ -47,6 +48,10 @@ export default class Toolbox extends Module<ToolboxNodes> {
     return {
       toolbox: 'ce-toolbox',
       toolboxButton: 'ce-toolbox__button',
+      toolboxButtonIcon: 'ce-toolbox__button-icon',
+      toolboxButtonName: 'ce-toolbox__button-name',
+      toolboxButtonDescription: 'ce-toolbox__button-description',
+
       toolboxButtonActive: 'ce-toolbox__button--active',
       toolboxOpened: 'ce-toolbox--opened',
       openedToolbarHolderModifier: 'codex-editor--toolbox-opened',
@@ -221,7 +226,20 @@ export default class Toolbox extends Module<ToolboxNodes> {
     const button = $.make('li', [ this.CSS.toolboxButton ]);
 
     button.dataset.tool = tool.name;
-    button.innerHTML = toolToolboxSettings.icon;
+
+    const buttonIcon = $.make('span', [ this.CSS.toolboxButtonIcon ]);
+
+    buttonIcon.innerHTML = toolToolboxSettings.icon;
+    const buttonName = $.make('span', [ this.CSS.toolboxButtonName ]);
+
+    buttonName.innerHTML = toolToolboxSettings.name;
+
+    const buttonDescription = $.make('span', [ this.CSS.toolboxButtonDescription ]);
+
+    buttonDescription.innerHTML = toolToolboxSettings.description;
+    button.append(buttonIcon);
+    button.append(buttonName);
+    button.append(buttonDescription);
 
     $.append(this.nodes.toolbox, button);
 
@@ -238,12 +256,12 @@ export default class Toolbox extends Module<ToolboxNodes> {
     /**
      * Add listeners to show/hide toolbox tooltip
      */
-    const tooltipContent = this.drawTooltip(tool);
-
-    this.tooltip.onHover(button, tooltipContent, {
-      placement: 'bottom',
-      hidingDelay: 200,
-    });
+    // const tooltipContent = this.drawTooltip(toolName);
+    //
+    // this.Editor.Tooltip.onHover(button, tooltipContent, {
+    //   placement: 'bottom',
+    //   hidingDelay: 200,
+    // });
 
     const shortcut = tool.shortcut;
 
