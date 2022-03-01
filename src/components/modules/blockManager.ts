@@ -47,6 +47,31 @@ export default class BlockManager extends Module {
   }
 
   /**
+   * Sets unfocus callback
+   * @param callback
+   */
+  public set unfocusCallback(callback) {
+    this._unfocusCallback = callback;
+  }
+
+  /**
+   * Call unfocus callback
+   */
+  public callUnfocusCallback() {
+    // console.log('block manager call UnfocusCallback');
+
+    if (this._unfocusCallback) {
+      // console.log('block manager call UnfocusCallback2');
+      this._unfocusCallback();
+      this._unfocusCallback = null;
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /**
    * returns first Block
    *
    * @returns {Block}
@@ -151,6 +176,13 @@ export default class BlockManager extends Module {
   private _currentBlockIndex = -1;
 
   /**
+   * Callback of unfocus
+   *
+   * @type {number}
+   */
+  private _unfocusCallback = null;
+
+  /**
    * Proxy for Blocks instance {@link Blocks}
    *
    * @type {Proxy}
@@ -218,17 +250,26 @@ export default class BlockManager extends Module {
    * @param {string} options.tool - tools passed in editor config {@link EditorConfig#tools}
    * @param {string} [options.id] - unique id for this block
    * @param {BlockToolData} [options.data] - constructor params
+   * @param {function} addBlockButtonClick - add block button click callback
+   * @param {function} onFocusBlock - focus block button click callback
    *
    * @returns {Block}
    */
   public composeBlock({
     tool: name,
     data = {},
-    id = undefined,
-    tunes: tunesData = {},
-  }: {tool: string; id?: string; data?: BlockToolData; tunes?: {[name: string]: BlockTuneData}}): Block {
+    id,
+    tunes: tunesData = {}
+    , addBlockButtonClick = null
+    , onFocusBlock = null
+  }: {tool: string; id?: string; data?: BlockToolData; tunes?: {[name: string]: BlockTuneData}, addBlockButtonClick?, onFocusBlock?}): Block {
     const readOnly = this.Editor.ReadOnly.isEnabled;
     const tool = this.Editor.Tools.blockTools.get(name);
+
+    if (this.config.addBlockButtonClick) {
+      addBlockButtonClick = this.config.addBlockButtonClick;
+    }
+
     const block = new Block({
       id,
       data,
@@ -236,7 +277,12 @@ export default class BlockManager extends Module {
       api: this.Editor.API,
       readOnly,
       tunesData,
+      addBlockButtonClick,
+      onFocusBlock,
     });
+
+    // console.log('compose block add btn', addBlockButtonClick);
+    // console.log('compose block on focus', onFocusBlock);
 
     if (!readOnly) {
       this.bindBlockEvents(block);
@@ -259,13 +305,15 @@ export default class BlockManager extends Module {
    * @returns {Block}
    */
   public insert({
-    id = undefined,
+    id,
     tool = this.config.defaultBlock,
     data = {},
     index,
     needToFocus = true,
     replace = false,
     tunes = {},
+    addBlockButtonClick,
+    onFocusBlock,
   }: {
     id?: string;
     tool?: string;
@@ -274,6 +322,8 @@ export default class BlockManager extends Module {
     needToFocus?: boolean;
     replace?: boolean;
     tunes?: {[name: string]: BlockTuneData};
+    addBlockButtonClick?;
+    onFocusBlock?;
   } = {}): Block {
     let newIndex = index;
 
@@ -281,11 +331,15 @@ export default class BlockManager extends Module {
       newIndex = this.currentBlockIndex + (replace ? 0 : 1);
     }
 
+    // console.log('block manager insert', addBlockButtonClick);
+
     const block = this.composeBlock({
       id,
       tool,
       data,
       tunes,
+      addBlockButtonClick,
+      onFocusBlock,
     });
 
     this._blocks.insert(newIndex, block, replace);

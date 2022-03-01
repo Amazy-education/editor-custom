@@ -76,6 +76,11 @@ export interface EditorConfig {
   readOnly?: boolean;
 
   /**
+   * Enable saving in read-only mode
+   */
+  readOnlySave?: boolean;
+
+  /**
    * Internalization config
    */
   i18n?: I18nConfig;
@@ -100,4 +105,14 @@ export interface EditorConfig {
    * Common Block Tunes list. Will be added to all the blocks which do not specify their own 'tunes' set
    */
   tunes?: string[];
+
+  /**
+   * Add block button click callback
+   */
+  addBlockButtonClick?(blockIndex): void;
+
+  /**
+   * Focus block button click callback
+   */
+  onFocusBlock?(blockIndex, holder): void;
 }
