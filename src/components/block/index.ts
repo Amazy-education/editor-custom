@@ -19,6 +19,11 @@ import BlockTune from '../tools/tune';
 import { BlockTuneData } from '../../../types/block-tunes/block-tune-data';
 import ToolsCollection from '../tools/collection';
 
+import {isNumber} from '../utils';
+
+type AddBlockButtonClickInterface = ( index: number ) => void;
+type OnFocusBlockInterface = ( index: number, unfocusCallback: object) => void;
+
 /**
  * Interface describes Block class constructor argument
  */
@@ -52,6 +57,16 @@ interface BlockConstructorOptions {
    * Tunes data for current Block
    */
   tunesData: {[name: string]: BlockTuneData};
+
+  /**
+   * This callback for Add block button
+   */
+  addBlockButtonClick?: AddBlockButtonClickInterface;
+
+  /**
+   * This callback for Block focus event
+   */
+  onFocusBlock?: OnFocusBlockInterface;
 }
 
 /**
@@ -100,6 +115,11 @@ export default class Block {
       focused: 'ce-block--focused',
       selected: 'ce-block--selected',
       dropTarget: 'ce-block--drop-target',
+      addBlockWrapper: 'add-block-btn-wrapper',
+      addBlockBtn: 'add-block-btn',
+      addBlockBtnClickSquare: 'add-block-btn-click-square',
+      addBlockLine: 'add-block-btn-line',
+      addBlockText: 'add-block-btn-text',
     };
   }
 
@@ -215,12 +235,26 @@ export default class Block {
   private readonly blockAPI: BlockAPIInterface;
 
   /**
+   * Callbak for Add block button
+   * @private
+   */
+  private addBlockButtonClick: AddBlockButtonClickInterface;
+
+  /**
+   * Callbak for Add block button
+   * @private
+   */
+  private onFocusBlock: OnFocusBlockInterface;
+
+  /**
    * @param {object} options - block constructor options
    * @param {string} [options.id] - block's id. Will be generated if omitted.
    * @param {BlockToolData} options.data - Tool's initial data
    * @param {BlockToolConstructable} options.tool — block's tool
    * @param options.api - Editor API module for pass it to the Block Tunes
    * @param {boolean} options.readOnly - Read-Only flag
+   * @param {function} options.addBlockButtonClick - Callback for add button
+   * @param {function} options.onFocusBlock - Callback for block focus
    */
   constructor({
     id = _.generateBlockId(),
@@ -229,6 +263,8 @@ export default class Block {
     api,
     readOnly,
     tunesData,
+    addBlockButtonClick = null,
+    onFocusBlock = null,
   }: BlockConstructorOptions) {
     this.name = tool.name;
     this.id = id;
@@ -236,6 +272,40 @@ export default class Block {
     this.config = tool.settings.config || {};
     this.api = api;
     this.blockAPI = new BlockAPI(this);
+    this.addBlockButtonClick = addBlockButtonClick;
+    // this.onFocusBlock = onFocusBlock;
+    const onFocusBlockFunc = (n, unfocusCallback?) => {
+      // rrr this.api.methods.blocks.callUnfocusCallback();
+
+      // console.log('onFocusBlockFunc n=', n);
+
+      // if (n) {
+      // rrr this.api.methods.blocks.setCurrentBlockIndex(n);
+      // }
+// 11
+      if (unfocusCallback) {
+        // rrr this.api.methods.blocks.setUnfocusCallback(unfocusCallback);
+      }
+      // const holder = this.api.methods.blocks.getBlockByIndex(n);
+
+      // if (holder)
+      //   console.log(holder.holder);
+    }
+
+    if (onFocusBlock) {
+
+      // console.log('check focus: exist');
+    } else {
+      onFocusBlock = onFocusBlockFunc
+      // console.log('check focus: NO exist');
+    }
+
+    // rrr this.onFocusBlock = onFocusBlock;
+
+    // this.onFocusBlock = onFocusBlock ?? onFocusBlockFunc;
+
+    // console.log('block constructor addblockbtn', addBlockButtonClick);
+    // console.log('block constructor on focus block', onFocusBlock);
 
     this.mutationObserver = new MutationObserver(this.didMutated);
 
@@ -730,6 +800,41 @@ export default class Block {
 
     wrapper.appendChild(wrappedContentNode);
 
+    // console.log('this.addBlockButtonClick', this.config.addBlockButtonClick);
+    // console.log('this.config', this.config);
+    // console.log('this.blockAPI', this);
+
+    if (this.addBlockButtonClick) {
+      const addBtn = this.getAddBtn()
+      wrapper.appendChild(addBtn);
+    }
+
+    return wrapper;
+  }
+
+  private getAddBtn(): HTMLDivElement {
+    const wrapper = $.make('div', Block.CSS.addBlockWrapper) as HTMLDivElement,
+          btn = $.make('span', Block.CSS.addBlockBtn),
+          text = $.make('span', Block.CSS.addBlockText),
+          btnClickSquare = $.make('span', Block.CSS.addBlockBtnClickSquare),
+          line = $.make('span', Block.CSS.addBlockLine);
+
+    btnClickSquare.onclick = () => {
+      // this.api.methods.blocks.insert();
+      const currentBlockIndex = this.api.methods.blocks.getCurrentBlockIndex();
+      // console.log('btnClickSquare.onclick', currentBlockIndex);
+      this.addBlockButtonClick(currentBlockIndex);
+    };
+    text.innerHTML = 'Add block';
+    btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M9.28571 5.71429H5.71429V9.28571C5.71429 9.67857 5.39286 10 5 10C4.60714 10 4.28571 9.67857 4.28571 9.28571V5.71429H0.714286C0.321429 5.71429 0 5.39286 0 5C0 4.60714 0.321429 4.28571 0.714286 4.28571H4.28571V0.714286C4.28571 0.321429 4.60714 0 5 0C5.39286 0 5.71429 0.321429 5.71429 0.714286V4.28571H9.28571C9.67857 4.28571 10 4.60714 10 5C10 5.39286 9.67857 5.71429 9.28571 5.71429Z" fill="#9293AD"/>' +
+      '</svg>';
+    btn.appendChild(text);
+
+    btnClickSquare.appendChild(btn);
+    wrapper.appendChild(btnClickSquare);
+    wrapper.appendChild(line);
+
     return wrapper;
   }
 
@@ -764,11 +869,72 @@ export default class Block {
      * Drop cache
      */
     this.cachedInputs = [];
-
+    // console.log('handleFocus');
     /**
      * Update current input
      */
     this.updateCurrentInput();
+
+    const currentBlockIndex = this.api.methods.blocks.getCurrentBlockIndex();
+    const currentBlock = this.api.methods.blocks.getBlockByIndex(currentBlockIndex);
+
+    let index = null;
+
+    if (currentBlock) {
+      const blockRedactorContainer = currentBlock.holder.closest('.codex-editor__redactor');
+
+      // console.log('currentBlock.holder', currentBlock.holder);
+
+      // console.log('blockRedactorContainer', blockRedactorContainer);
+
+      if (blockRedactorContainer) {
+        const parentBlock = blockRedactorContainer.closest('.ce-block');
+
+        // console.log('parentBlock', parentBlock);
+
+        if (parentBlock) {
+          const parentBlockContainer = parentBlock.closest('.codex-editor__redactor');
+
+          // console.log('parentBlockContainer', parentBlockContainer);
+
+          if (parentBlockContainer) {
+            index = Array
+              .from(parentBlockContainer.children)
+              .findIndex((n) => {
+                // console.log('findIndex', n, parentBlock);
+                return n === parentBlock
+              });
+          }
+        }
+      }
+    }
+
+    if (this.onFocusBlock && isNumber(index) && index > -1) {
+      // console.log('set onFocusBlock', );
+      const unFocusCallback = () => {
+        const n = this.api.methods.blocks.getCurrentBlockIndex();
+        // console.log('unFocusCallback call current=', n);
+        const holder = this.api.methods.blocks.getBlockByIndex(n);
+
+        // 11
+        // this.api.methods.blocks.unSelectBLockByIndex(n);
+        this.api.methods.toolbar.close();
+
+        if (holder) {
+          // console.log(holder);
+          // console.log('unFocusCallback holder', holder.holder);
+          // holder.selected = false;
+        }
+      }
+
+
+      // rrr this.onFocusBlock(index, unFocusCallback);
+      // this.onFocusBlock(index, null);
+    } else {
+      // 11
+      // rrr this.onFocusBlock(null, null);
+      // console.log('handleFocus not exist', currentBlockIndex, index);
+    }
   }
 
   /**

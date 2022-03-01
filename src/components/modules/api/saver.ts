@@ -27,10 +27,12 @@ export default class SaverAPI extends Module {
   public save(): Promise<OutputData> {
     const errorText = 'Editor\'s content can not be saved in read-only mode';
 
-    if (this.Editor.ReadOnly.isEnabled) {
-      _.logLabeled(errorText, 'warn');
+    // console.log('api.saver save', this.Editor.ReadOnly.isEnabled);
 
-      return Promise.reject(new Error(errorText));
+    if (this.Editor.ReadOnly.isEnabled) {
+    //   _.logLabeled(errorText, 'warn');
+    //   console.log('api.saver save ReadOnly.isEnabled = true');
+    //   return Promise.reject(new Error(errorText));
     }
 
     return this.Editor.Saver.save();
