@@ -1,4 +1,5 @@
 import Shortcut from '@codexteam/shortcuts';
+import {log} from "../utils";
 
 /**
  * Contains keyboard and mouse events binded on each Block by Block Manager
@@ -54,9 +55,11 @@ class Shortcuts {
     const foundShortcut = this.findShortcut(shortcut.on, shortcut.name);
 
     if (foundShortcut) {
-      throw Error(
-        `Shortcut ${shortcut.name} is already registered for ${shortcut.on}. Please remove it before add a new handler.`
-      );
+      // console.log(`Shortcut ${shortcut.name} is already registered for ${shortcut.on}. Please remove it before add a new handler.`);
+      return;
+      // throw Error(
+      //   `Shortcut ${shortcut.name} is already registered for ${shortcut.on}. Please remove it before add a new handler.`
+      // );
     }
 
     const newShortcut = new Shortcut({

@@ -80,6 +80,8 @@ export interface BlockTool extends BaseTool {
   moved?(event: MoveEvent): void;
 }
 
+type OnFocusBlockInterface = ( index: number ) => void;
+
 /**
  * Describe constructor parameters
  */
@@ -89,6 +91,10 @@ export interface BlockToolConstructorOptions<D extends object = any, C extends o
   config?: ToolConfig<C>;
   block?: BlockAPI;
   readOnly: boolean;
+  /**
+   * This callback for Block focus event
+   */
+  onFocusBlock?: OnFocusBlockInterface;
 }
 
 export interface BlockToolConstructable extends BaseToolConstructable {

@@ -68,7 +68,7 @@ export default class ModificationsObserver extends Module {
    * @param {boolean} readOnlyEnabled - read only flag value
    */
   public toggleReadOnly(readOnlyEnabled: boolean): void {
-    if (readOnlyEnabled) {
+    if (readOnlyEnabled && !this.config.readOnlySave) {
       this.disableModule();
     } else {
       this.enableModule();

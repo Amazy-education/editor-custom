@@ -1,5 +1,5 @@
 import { Tooltip as ITooltip } from '../../../../types/api';
-import { TooltipContent, TooltipOptions } from 'codex-tooltip';
+import { TooltipContent, TooltipOptions } from '../../../../../../../Amazy/projects/editor.js/node_modules/codex-tooltip/dist/types';
 import Module from '../../__module';
 import { ModuleConfig } from '../../../types-internal/module-config';
 import Tooltip from '../../utils/tooltip';

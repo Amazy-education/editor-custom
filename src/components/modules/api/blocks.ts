@@ -25,6 +25,10 @@ export default class BlocksAPI extends Module {
       getBlockByIndex: (index: number): BlockAPIInterface | void => this.getBlockByIndex(index),
       getById: (id: string): BlockAPIInterface | null => this.getById(id),
       getCurrentBlockIndex: (): number => this.getCurrentBlockIndex(),
+      unSelectBLockByIndex: (index): void => this.unSelectBLockByIndex(index),
+      setCurrentBlockIndex: (index): void => this.setCurrentBlockIndex(index),
+      setUnfocusCallback: (callback): void => this.setUnfocusCallback(callback),
+      callUnfocusCallback: (): void => this.callUnfocusCallback(),
       getBlocksCount: (): number => this.getBlocksCount(),
       stretchBlock: (index: number, status = true): void => this.stretchBlock(index, status),
       insertNewBlock: (): void => this.insertNewBlock(),
@@ -48,6 +52,44 @@ export default class BlocksAPI extends Module {
    */
   public getCurrentBlockIndex(): number {
     return this.Editor.BlockManager.currentBlockIndex;
+  }
+
+  /**
+   * Set current block index
+   *
+   * @returns {number}
+   */
+  public setCurrentBlockIndex(index): void {
+    this.Editor.BlockManager.currentBlockIndex = index;
+  }
+
+  /**
+   * Unselect block by index
+   *
+   * @returns {number}
+   */
+  public unSelectBLockByIndex(index): void {
+    this.Editor.BlockManager.clearFocused();
+    // this.Editor.BlockSelection.unSelectBlockByIndex(index);
+  }
+
+  /**
+   * Set unfocus callback
+   *
+   * @returns {number}
+   */
+  public setUnfocusCallback(callback): void {
+    this.Editor.BlockManager.unfocusCallback = callback;
+  }
+
+  /**
+   * Call unfocus callback
+   *
+   * @returns {number}
+   */
+  public callUnfocusCallback(): void {
+    // console.log('blocks callUnfocusCallback');
+    this.Editor.BlockManager.callUnfocusCallback();
   }
 
   /**

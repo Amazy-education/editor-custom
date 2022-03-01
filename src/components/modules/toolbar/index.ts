@@ -210,7 +210,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
     if (!isMobile) {
       const contentOffset = Math.floor(blockHeight / 2);
 
-      // this.nodes.plusButton.style.transform = `translate3d(0, calc(${contentOffset}px - 50%), 0)`;
+      this.nodes.plusButton.style.transform = `translate3d(0, calc(${contentOffset}px - 50%), 0)`;
       // this.Editor.Toolbox.nodes.toolbox.style.transform = `translate3d(0, calc(${contentOffset}px - 50%), 0)`;
     } else {
       toolbarY += blockHeight;
@@ -309,9 +309,19 @@ export default class Toolbar extends Module<ToolbarNodes> {
      */
     this.nodes.blockActionsButtons = $.make('div', this.CSS.blockActionsButtons);
     this.nodes.settingsToggler = $.make('span', this.CSS.settingsToggler);
-    const settingsIcon = $.svg('dots', 8, 8);
 
-    $.append(this.nodes.settingsToggler, settingsIcon);
+    // delete after
+    // const settingsIcon = $.svg('dots', 8, 8);
+
+    this.nodes.settingsToggler.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M15.4141 6.58588C16.1952 7.36693 16.1952 8.63326 15.4141 9.41431C14.6331 10.1954 13.3668 10.1954 12.5857 9.41431C11.8047 8.63326 11.8047 7.36693 12.5857 6.58588C13.3668 5.80483 14.6331 5.80483 15.4141 6.58588Z" fill="#9293AD"/>' +
+      '<path d="M9.41423 6.58588C10.1953 7.36693 10.1953 8.63326 9.41423 9.41431C8.63318 10.1954 7.36686 10.1954 6.58581 9.41431C5.80477 8.63326 5.80477 7.36693 6.58581 6.58588C7.36686 5.80483 8.63318 5.80483 9.41423 6.58588Z" fill="#9293AD"/>' +
+      '<path d="M3.41424 6.58588C4.19528 7.36693 4.19528 8.63326 3.41424 9.41431C2.63319 10.1954 1.36686 10.1954 0.585815 9.41431C-0.195231 8.63326 -0.195231 7.36693 0.585815 6.58588C1.36686 5.80483 2.63319 5.80483 3.41424 6.58588Z" fill="#9293AD"/>' +
+      '</svg>';
+
+    // delete after
+    // $.append(this.nodes.settingsToggler, settingsIcon);
+
     $.append(this.nodes.blockActionsButtons, this.nodes.settingsToggler);
     $.append(this.nodes.actions, this.nodes.blockActionsButtons);
 
