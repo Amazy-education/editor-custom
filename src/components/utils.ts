@@ -194,8 +194,8 @@ export function typeOf(object: any): string {
  * @returns {boolean}
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isFunction(fn: any): fn is Function {
-  return typeOf(fn) === 'function';
+export function isFunction(fn: any): fn is (...args: any[]) => any {
+  return typeOf(fn) === 'function' || typeOf(fn) === 'asyncfunction';
 }
 
 /**
@@ -429,14 +429,12 @@ export function isValidMimeType(type: string): boolean {
  * @param {boolean} immediate - call now
  * @returns {Function}
  */
-export function debounce(func: () => void, wait?: number, immediate?: boolean): () => void {
+export function debounce(func: (...args: unknown[]) => void, wait?: number, immediate?: boolean): () => void {
   let timeout;
 
-  return (): void => {
+  return (...args: unknown[]): void => {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const context = this,
-        // eslint-disable-next-line prefer-rest-params
-        args = arguments;
+    const context = this;
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const later = () => {
@@ -453,6 +451,68 @@ export function debounce(func: () => void, wait?: number, immediate?: boolean): 
     if (callNow) {
       func.apply(context, args);
     }
+  };
+}
+
+/**
+ * Returns a function, that, when invoked, will only be triggered at most once during a given window of time.
+ *
+ * @param func - function to throttle
+ * @param wait - function will be called only once for that period
+ * @param options - Normally, the throttled function will run as much as it can
+ *                  without ever going more than once per `wait` duration;
+ *                  but if you'd like to disable the execution on the leading edge, pass
+ *                  `{leading: false}`. To disable execution on the trailing edge, ditto.
+ */
+export function throttle(func, wait, options: {leading?: boolean; trailing?: boolean} = undefined): () => void {
+  let context, args, result;
+  let timeout = null;
+  let previous = 0;
+
+  if (!options) {
+    options = {};
+  }
+
+  const later = function (): void {
+    previous = options.leading === false ? 0 : Date.now();
+    timeout = null;
+    result = func.apply(context, args);
+
+    if (!timeout) {
+      context = args = null;
+    }
+  };
+
+  return function (): unknown {
+    const now = Date.now();
+
+    if (!previous && options.leading === false) {
+      previous = now;
+    }
+
+    const remaining = wait - (now - previous);
+
+    context = this;
+
+    // eslint-disable-next-line prefer-rest-params
+    args = arguments;
+
+    if (remaining <= 0 || remaining > wait) {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      previous = now;
+      result = func.apply(context, args);
+
+      if (!timeout) {
+        context = args = null;
+      }
+    } else if (!timeout && options.trailing !== false) {
+      timeout = setTimeout(later, remaining);
+    }
+
+    return result;
   };
 }
 
@@ -660,7 +720,7 @@ export function deprecationAssert(condition: boolean, oldProperty: string, newPr
  * @param propertyKey - method or accessor name
  * @param descriptor - property descriptor
  */
-export function cacheable<Target, Value, Arguments extends any[] = any[]>(
+export function cacheable<Target, Value, Arguments extends unknown[] = unknown[]>(
   target: Target,
   propertyKey: string,
   descriptor: PropertyDescriptor
@@ -672,7 +732,7 @@ export function cacheable<Target, Value, Arguments extends any[] = any[]>(
   /**
    * Override get or value descriptor property to cache return value
    *
-   * @param args
+   * @param args - method args
    */
   descriptor[propertyToOverride] = function (...args: Arguments): Value {
     /**
@@ -688,12 +748,12 @@ export function cacheable<Target, Value, Arguments extends any[] = any[]>(
   /**
    * If get accessor has been overridden, we need to override set accessor to clear cache
    *
-   * @param value
+   * @param value - value to set
    */
   if (propertyToOverride === 'get' && descriptor.set) {
     const originalSet = descriptor.set;
 
-    descriptor.set = function (value: any): void {
+    descriptor.set = function (value: unknown): void {
       delete target[cacheKey];
 
       originalSet.apply(this, value);
@@ -702,3 +762,20 @@ export function cacheable<Target, Value, Arguments extends any[] = any[]>(
 
   return descriptor;
 };
+
+/**
+ * True if screen has mobile size
+ */
+export function isMobileScreen(): boolean {
+  return window.matchMedia('(max-width: 650px)').matches;
+}
+
+/**
+ * True if current device runs iOS
+ */
+export const isIosDevice =
+  typeof window !== 'undefined' &&
+  window.navigator &&
+  window.navigator.platform &&
+  (/iP(ad|hone|od)/.test(window.navigator.platform) ||
+    (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1));

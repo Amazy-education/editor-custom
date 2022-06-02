@@ -1,4 +1,5 @@
-import Header from '../../../example/tools/header';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Header from '@editorjs/header';
 import { nanoid } from 'nanoid';
 
 describe.only('Block ids', () => {
@@ -30,7 +31,7 @@ describe.only('Block ids', () => {
       .click();
 
     cy.get('[data-cy=editorjs]')
-      .get('li.ce-toolbox__button[data-tool=header]')
+      .get('div.ce-popover__item[data-item-name=header]')
       .click();
 
     cy.get('[data-cy=editorjs]')
