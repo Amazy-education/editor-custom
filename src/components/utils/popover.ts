@@ -1,7 +1,7 @@
 import Dom from '../dom';
 import Listeners from './listeners';
 import Flipper from '../flipper';
-import SearchInput from './search-input';
+// import SearchInput from './search-input';
 import EventsDispatcher from './events';
 import { isMobileScreen, keyCodes, cacheable } from '../utils';
 import ScrollLocker from './scroll-locker';
@@ -19,6 +19,11 @@ export interface PopoverItem {
    * Displayed text
    */
   label: string;
+
+  /**
+   * Description text
+   */
+  description: string;
 
   /**
    * Item name
@@ -100,10 +105,10 @@ export default class Popover extends EventsDispatcher<PopoverEvent> {
    */
   private readonly searchable: boolean;
 
-  /**
-   * Instance of the Search Input
-   */
-  private search: SearchInput;
+  // /**
+  //  * Instance of the Search Input
+  //  */
+  // private search: SearchInput;
 
   /**
    * Label for the 'Filter' placeholder
@@ -126,6 +131,7 @@ export default class Popover extends EventsDispatcher<PopoverEvent> {
     itemHidden: string;
     itemFocused: string;
     itemLabel: string;
+    itemDescription: string;
     itemIcon: string;
     itemSecondaryLabel: string;
     noFoundMessage: string;
@@ -141,6 +147,7 @@ export default class Popover extends EventsDispatcher<PopoverEvent> {
       itemHidden: 'ce-popover__item--hidden',
       itemFocused: 'ce-popover__item--focused',
       itemLabel: 'ce-popover__item-label',
+      itemDescription: 'ce-popover__item--description',
       itemIcon: 'ce-popover__item-icon',
       itemSecondaryLabel: 'ce-popover__item-secondary-label',
       noFoundMessage: 'ce-popover__no-found',
@@ -198,18 +205,18 @@ export default class Popover extends EventsDispatcher<PopoverEvent> {
     /**
      * Clear search and items scrolling
      */
-    this.search.clear();
+    // this.search.clear();
     this.nodes.items.scrollTop = 0;
 
     this.nodes.popover.classList.add(Popover.CSS.popoverOpened);
     this.nodes.overlay.classList.remove(Popover.CSS.popoverOverlayHidden);
     this.flipper.activate();
 
-    if (this.searchable) {
-      window.requestAnimationFrame(() => {
-        this.search.focus();
-      });
-    }
+    // if (this.searchable) {
+    //   window.requestAnimationFrame(() => {
+    //     this.search.focus();
+    //   });
+    // }
 
     if (isMobileScreen()) {
       this.scrollLocker.lock();
@@ -286,9 +293,9 @@ export default class Popover extends EventsDispatcher<PopoverEvent> {
     this.nodes.overlay = Dom.make('div', [Popover.CSS.popoverOverlay, Popover.CSS.popoverOverlayHidden]);
     this.nodes.wrapper.appendChild(this.nodes.overlay);
 
-    if (this.searchable) {
-      this.addSearch(this.nodes.popover);
-    }
+    // if (this.searchable) {
+    //   this.addSearch(this.nodes.popover);
+    // }
 
     this.nodes.items = Dom.make('div', Popover.CSS.itemsWrapper);
     this.items.forEach(item => {
@@ -315,44 +322,44 @@ export default class Popover extends EventsDispatcher<PopoverEvent> {
     });
   }
 
-  /**
-   * Adds the s4arch field to passed element
-   *
-   * @param holder - where to append search input
-   */
-  private addSearch(holder: HTMLElement): void {
-    this.search = new SearchInput({
-      items: this.items,
-      placeholder: this.filterLabel,
-      onSearch: (filteredItems): void => {
-        const itemsVisible = [];
-
-        this.items.forEach((item, index) => {
-          const itemElement = this.nodes.items.children[index];
-
-          if (filteredItems.includes(item)) {
-            itemsVisible.push(itemElement);
-            itemElement.classList.remove(Popover.CSS.itemHidden);
-          } else {
-            itemElement.classList.add(Popover.CSS.itemHidden);
-          }
-        });
-
-        this.nodes.nothingFound.classList.toggle(Popover.CSS.noFoundMessageShown, itemsVisible.length === 0);
-
-        /**
-         * Update flipper items with only visible
-         */
-        this.flipper.deactivate();
-        this.flipper.activate(itemsVisible);
-        this.flipper.focusFirst();
-      },
-    });
-
-    const searchField = this.search.getElement();
-
-    holder.appendChild(searchField);
-  }
+  // /**
+  //  * Adds the s4arch field to passed element
+  //  *
+  //  * @param holder - where to append search input
+  //  */
+  // private addSearch(holder: HTMLElement): void {
+  //   this.search = new SearchInput({
+  //     items: this.items,
+  //     placeholder: this.filterLabel,
+  //     onSearch: (filteredItems): void => {
+  //       const itemsVisible = [];
+  //
+  //       this.items.forEach((item, index) => {
+  //         const itemElement = this.nodes.items.children[index];
+  //
+  //         if (filteredItems.includes(item)) {
+  //           itemsVisible.push(itemElement);
+  //           itemElement.classList.remove(Popover.CSS.itemHidden);
+  //         } else {
+  //           itemElement.classList.add(Popover.CSS.itemHidden);
+  //         }
+  //       });
+  //
+  //       this.nodes.nothingFound.classList.toggle(Popover.CSS.noFoundMessageShown, itemsVisible.length === 0);
+  //
+  //       /**
+  //        * Update flipper items with only visible
+  //        */
+  //       this.flipper.deactivate();
+  //       this.flipper.activate(itemsVisible);
+  //       this.flipper.focusFirst();
+  //     },
+  //   });
+  //
+  //   const searchField = this.search.getElement();
+  //
+  //   holder.appendChild(searchField);
+  // }
 
   /**
    * Renders the single item
@@ -374,6 +381,12 @@ export default class Popover extends EventsDispatcher<PopoverEvent> {
     }
 
     el.appendChild(label);
+
+    if (item.description) {
+      el.appendChild(Dom.make('div', Popover.CSS.itemDescription, {
+        textContent: item.description,
+      }));
+    }
 
     if (item.secondaryLabel) {
       el.appendChild(Dom.make('div', Popover.CSS.itemSecondaryLabel, {

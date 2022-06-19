@@ -34,6 +34,10 @@ export enum UserSettings {
    */
   Shortcut = 'shortcut',
   /**
+   * Description for Tool
+   */
+  Description = 'description',
+  /**
    * Toolbox config for Tool
    */
   Toolbox = 'toolbox',
@@ -59,6 +63,10 @@ export enum CommonInternalSettings {
    * Shortcut for Tool
    */
   Shortcut = 'shortcut',
+  /**
+   * Description for Tool
+   */
+  Description = 'description',
   /**
    * Sanitize configuration for Tool
    */
@@ -235,6 +243,16 @@ export default abstract class BaseTool<Type extends Tool = Tool> {
   public get shortcut(): string | undefined {
     const toolShortcut = this.constructable[CommonInternalSettings.Shortcut];
     const userShortcut = this.config[UserSettings.Shortcut];
+
+    return userShortcut || toolShortcut;
+  }
+
+  /**
+   * Returns description for Tool (internal or specified by user)
+   */
+  public get description(): string | undefined {
+    const toolShortcut = this.constructable[CommonInternalSettings.Description];
+    const userShortcut = this.config[UserSettings.Description];
 
     return userShortcut || toolShortcut;
   }

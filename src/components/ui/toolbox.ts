@@ -129,10 +129,12 @@ export default class Toolbox extends EventsDispatcher<ToolboxEvent> {
   public make(): Element {
     this.popover = new Popover({
       className: Toolbox.CSS.toolbox,
-      searchable: true,
+      searchable: false,
       filterLabel: this.i18nLabels.filter,
       nothingFoundLabel: this.i18nLabels.nothingFound,
       items: this.toolsToBeDisplayed.map(tool => {
+        console.log(tool.description);
+
         return {
           icon: tool.toolbox.icon,
           label: I18n.t(I18nInternalNS.toolNames, tool.toolbox.title || _.capitalize(tool.name)),
@@ -140,6 +142,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEvent> {
           onClick: (item): void => {
             this.toolButtonActivated(tool.name);
           },
+          description: tool.description,
           secondaryLabel: tool.shortcut ? _.beautifyShortcut(tool.shortcut) : '',
         };
       }),
