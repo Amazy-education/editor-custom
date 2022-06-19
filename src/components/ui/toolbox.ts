@@ -133,7 +133,6 @@ export default class Toolbox extends EventsDispatcher<ToolboxEvent> {
       filterLabel: this.i18nLabels.filter,
       nothingFoundLabel: this.i18nLabels.nothingFound,
       items: this.toolsToBeDisplayed.map(tool => {
-        console.log(tool.description);
 
         return {
           icon: tool.toolbox.icon,
@@ -142,7 +141,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEvent> {
           onClick: (item): void => {
             this.toolButtonActivated(tool.name);
           },
-          description: tool.description,
+          description: tool.toolbox.description,
           secondaryLabel: tool.shortcut ? _.beautifyShortcut(tool.shortcut) : '',
         };
       }),

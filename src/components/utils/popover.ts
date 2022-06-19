@@ -3,7 +3,7 @@ import Listeners from './listeners';
 import Flipper from '../flipper';
 // import SearchInput from './search-input';
 import EventsDispatcher from './events';
-import { isMobileScreen, keyCodes, cacheable } from '../utils';
+import { cacheable, isMobileScreen, keyCodes } from '../utils';
 import ScrollLocker from './scroll-locker';
 
 /**

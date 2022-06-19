@@ -388,7 +388,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
     ////$.append(this.nodes.blockActionsButtons, this.nodes.settingsToggler);
     ////$.append(this.nodes.actions, this.nodes.blockActionsButtons);
 
-    const settingsIcon = $.svg('dots', 16, 16);
+    const settingsIcon = $.svg('threedots', 16, 16);
 
     $.append(this.nodes.settingsToggler, settingsIcon);
     $.append(this.nodes.actions, this.nodes.settingsToggler);
