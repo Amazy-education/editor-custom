@@ -31,7 +31,7 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
       conversionToolbarTools: 'ce-conversion-toolbar__tools',
       conversionToolbarLabel: 'ce-conversion-toolbar__label',
       conversionTool: 'ce-conversion-tool',
-      conversionToolHidden: 'ce-conversion-tool--hidden',
+      conversionToolSelect: 'ce-conversion-tool--select',
       conversionToolIcon: 'ce-conversion-tool__icon',
 
       conversionToolFocused: 'ce-conversion-tool--focused',
@@ -87,7 +87,7 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
      */
     this.enableFlipper();
 
-    $.append(this.nodes.wrapper, label);
+    // $.append(this.nodes.wrapper, label);
     $.append(this.nodes.wrapper, this.nodes.tools);
 
     return this.nodes.wrapper;
@@ -302,16 +302,18 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
    *
    * @param {string} toolName - name of Tool to add
    * @param {string} toolIcon - Tool icon
+   * @param {string} selectIcon - Tool icon
    * @param {string} title - button title
    */
   private addTool(toolName: string, toolIcon: string, title: string): void {
     const tool = $.make('div', [ ConversionToolbar.CSS.conversionTool ]);
     const icon = $.make('div', [ ConversionToolbar.CSS.conversionToolIcon ]);
+    const selectIcon = $.svg('tick', 20, 20);
 
     tool.dataset.tool = toolName;
     icon.innerHTML = toolIcon;
 
-    $.append(tool, icon);
+    $.append(tool, [icon, selectIcon]);
     $.append(tool, $.text(I18n.t(I18nInternalNS.toolNames, title || _.capitalize(toolName))));
 
     $.append(this.nodes.tools, tool);
@@ -333,7 +335,7 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
      */
     Object.entries(this.tools).forEach(([name, button]) => {
       button.hidden = false;
-      button.classList.toggle(ConversionToolbar.CSS.conversionToolHidden, name === currentBlock.name);
+      button.classList.toggle(ConversionToolbar.CSS.conversionToolSelect, name === currentBlock.name);
     });
   }
 

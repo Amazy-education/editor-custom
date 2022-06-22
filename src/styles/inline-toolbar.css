@@ -1,5 +1,6 @@
 .ce-inline-toolbar {
   @apply --overlay-pane;
+
   transform: translateX(-50%) translateY(8px) scale(0.9);
   opacity: 0;
   visibility: hidden;
@@ -12,7 +13,7 @@
   &--showed {
     opacity: 1;
     visibility: visible;
-    transform: translateX(-50%)
+    transform: translateX(-50%);
   }
 
   &--left-oriented {
@@ -39,24 +40,33 @@
   &__toggler-and-button-wrapper {
     display: flex;
     width: 100%;
-    padding: 0 6px;
   }
 
   &__buttons {
     display: flex;
   }
 
-  &__actions {
-  }
-
   &__dropdown {
     display: inline-flex;
     height: var(--toolbar-buttons-size);
     padding: 0 9px 0 10px;
-    margin: 0 6px 0 -6px;
+    margin: 0;
     align-items: center;
     cursor: pointer;
-    border-right: 1px solid var(--color-gray-border);
+    max-width: 190px;
+    width: 190px;
+    position: relative;
+    box-sizing: border-box;
+
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      right: 0;
+      width: 1px;
+      height: 24px;
+      background: rgba(37, 37, 92, 0.1);
+    }
 
     &:hover {
       background: var(--bg-light);
@@ -66,18 +76,40 @@
       display: none;
     }
 
-    &-content{
+    &-content {
       display: flex;
       font-weight: 500;
       font-size: 14px;
 
       svg {
-        height: 12px;
+        height: 24px;
       }
     }
 
+    &-icon {
+      display: inline-flex;
+      width: 24px;
+      height: 24px;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    &-text {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-right: 4px;
+      font-weight: 400;
+    }
+
     .icon--toggler-down {
-      margin-left: 4px;
+      margin-left: auto;
     }
   }
 
@@ -90,18 +122,14 @@
 
 .ce-inline-tool {
   @apply --toolbar-button;
+
   border-radius: 0;
   line-height: normal;
   width: auto;
-  padding: 0 5px !important;
-  min-width: 24px;
-
-  &:not(:last-of-type) {
-    margin-right: 2px;
-  }
+  min-width: 36px;
 
   .icon {
-    height: 12px;
+    height: 24px;
   }
 
   &--link {
@@ -114,6 +142,7 @@
     .icon--link {
       display: none;
     }
+
     .icon--unlink {
       display: inline-block;
       margin-bottom: -1px;
@@ -131,7 +160,7 @@
     box-sizing: border-box;
     display: none;
     font-weight: 500;
-    border-top: 1px solid rgba(201,201,204,.48);
+    border-top: 1px solid rgba(201, 201, 204, 0.48);
 
     &::placeholder {
       color: var(--grayText);
@@ -140,5 +169,9 @@
     &--showed {
       display: block;
     }
+  }
+
+  &--active {
+    color: #0075ff;
   }
 }

@@ -2,13 +2,13 @@ import $ from '../dom';
 import { InlineTool, SanitizerConfig } from '../../../types';
 
 /**
- * Bold Tool
+ * Italic Tool
  *
  * Inline Toolbar Tool
  *
- * Makes selected text bolder
+ * Style selected text with italic
  */
-export default class BoldInlineTool implements InlineTool {
+export default class UnderlineInlineTool implements InlineTool {
   /**
    * Specifies Tool as Inline Toolbar Tool
    *
@@ -19,24 +19,24 @@ export default class BoldInlineTool implements InlineTool {
   /**
    * Title for hover-tooltip
    */
-  public static title = 'Bold';
+  public static title = 'Underline';
 
   /**
    * Sanitizer Rule
-   * Leave <b> tags
+   * Leave <u> tags
    *
    * @returns {object}
    */
   public static get sanitize(): SanitizerConfig {
     return {
-      b: {},
+      u: {},
     } as SanitizerConfig;
   }
 
   /**
-   * Native Document's command that uses for Bold
+   * Native Document's command that uses for Underline
    */
-  private readonly commandName: string = 'bold';
+  private readonly commandName: string = 'underline';
 
   /**
    * Styles
@@ -44,14 +44,14 @@ export default class BoldInlineTool implements InlineTool {
   private readonly CSS = {
     button: 'ce-inline-tool',
     buttonActive: 'ce-inline-tool--active',
-    buttonModifier: 'ce-inline-tool--bold',
+    buttonModifier: 'ce-inline-tool--underline',
   };
 
   /**
    * Elements
    */
   private nodes: {button: HTMLButtonElement} = {
-    button: undefined,
+    button: null,
   };
 
   /**
@@ -61,13 +61,13 @@ export default class BoldInlineTool implements InlineTool {
     this.nodes.button = document.createElement('button') as HTMLButtonElement;
     this.nodes.button.type = 'button';
     this.nodes.button.classList.add(this.CSS.button, this.CSS.buttonModifier);
-    this.nodes.button.appendChild($.svg('bold', 24, 24));
+    this.nodes.button.appendChild($.svg('underline', 24, 24));
 
     return this.nodes.button;
   }
 
   /**
-   * Wrap range with <b> tag
+   * Wrap range with <u> tag
    *
    * @param {Range} range - range to wrap
    */
@@ -76,11 +76,9 @@ export default class BoldInlineTool implements InlineTool {
   }
 
   /**
-   * Check selection and set activated state to button if there are <b> tag
+   * Check selection and set activated state to button if there are <u> tag
    *
    * @param {Selection} selection - selection to check
-   *
-   * @returns {boolean}
    */
   public checkState(selection: Selection): boolean {
     const isActive = document.queryCommandState(this.commandName);
@@ -92,10 +90,8 @@ export default class BoldInlineTool implements InlineTool {
 
   /**
    * Set a shortcut
-   *
-   * @returns {boolean}
    */
   public get shortcut(): string {
-    return 'CMD+B';
+    return 'CMD+U';
   }
 }
