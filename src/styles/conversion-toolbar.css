@@ -10,6 +10,7 @@
   width: 200px;
   margin-top: 5px;
   box-sizing: content-box;
+  overflow: hidden;
 
   &--showed {
     opacity: 1;
