@@ -3,7 +3,7 @@ import SelectionUtils from '../selection';
 import $ from '../dom';
 import * as _ from '../utils';
 import { InlineTool, SanitizerConfig } from '../../../types';
-import { Notifier, Toolbar, I18n } from '../../../types/api';
+import { I18n, Notifier, Toolbar } from '../../../types/api';
 
 /**
  * Link Tool
@@ -160,11 +160,11 @@ export default class LinkInlineTool implements InlineTool {
        */
       if (!this.inputOpened) {
         /** Create blue background instead of selection */
-        this.selection.setFakeBackground();
+        // this.selection.setFakeBackground();
         this.selection.save();
       } else {
         this.selection.restore();
-        this.selection.removeFakeBackground();
+        // this.selection.removeFakeBackground();
       }
       const parentAnchor = this.selection.findParentTag('A');
 

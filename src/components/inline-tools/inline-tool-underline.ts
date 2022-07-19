@@ -29,7 +29,9 @@ export default class UnderlineInlineTool implements InlineTool {
    */
   public static get sanitize(): SanitizerConfig {
     return {
-      u: {},
+      u(el){
+        return el.textContent !== '';
+      }
     } as SanitizerConfig;
   }
 

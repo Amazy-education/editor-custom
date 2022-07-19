@@ -29,7 +29,7 @@ export default class StrikeInlineTool implements InlineTool {
    */
   public static get sanitize(): SanitizerConfig {
     return {
-      del: {},
+      strike: {},
     } as SanitizerConfig;
   }
 
