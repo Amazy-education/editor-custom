@@ -216,8 +216,12 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
 
     if (_.isFunction(exportProp)) {
       exportData = exportProp(blockData);
+      console.log('func:', exportData);
+
     } else if (_.isString(exportProp)) {
       exportData = blockData[exportProp];
+      console.log('string:', exportData);
+
     } else {
       _.log('Conversion «export» property must be a string or function. ' +
         'String means key of saved data object to export. Function should export processed string to export.');
@@ -243,7 +247,9 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
 
     if (_.isFunction(importProp)) {
       newBlockData = importProp(cleaned);
+      console.log('func:', newBlockData);
     } else if (_.isString(importProp)) {
+      console.log('string:', newBlockData);
       newBlockData[importProp] = cleaned;
     } else {
       _.log('Conversion «import» property must be a string or function. ' +

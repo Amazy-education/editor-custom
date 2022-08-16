@@ -22,6 +22,16 @@ export default class UnderlineInlineTool implements InlineTool {
   public static title = 'Underline';
 
   /**
+   * Styles
+   */
+  private readonly CSS = {
+    button: 'ce-inline-tool',
+    buttonActive: 'ce-inline-tool--active',
+    buttonModifier: 'ce-inline-tool--underline',
+    underline: 'cdx-underline',
+  };
+
+  /**
    * Sanitizer Rule
    * Leave <u> tags
    *
@@ -29,9 +39,9 @@ export default class UnderlineInlineTool implements InlineTool {
    */
   public static get sanitize(): SanitizerConfig {
     return {
-      u(el){
-        return el.textContent !== '';
-      }
+      u: {
+        class: true,
+      },
     } as SanitizerConfig;
   }
 
@@ -40,14 +50,7 @@ export default class UnderlineInlineTool implements InlineTool {
    */
   private readonly commandName: string = 'underline';
 
-  /**
-   * Styles
-   */
-  private readonly CSS = {
-    button: 'ce-inline-tool',
-    buttonActive: 'ce-inline-tool--active',
-    buttonModifier: 'ce-inline-tool--underline',
-  };
+
 
   /**
    * Elements

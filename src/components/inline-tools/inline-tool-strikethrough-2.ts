@@ -2,7 +2,7 @@ import $ from '../dom';
 import { InlineTool, SanitizerConfig } from '../../../types';
 
 /**
- * Italic Tool
+ * Strikethrough Tool
  *
  * Inline Toolbar Tool
  *
@@ -23,7 +23,7 @@ export default class StrikeInlineTool implements InlineTool {
 
   /**
    * Sanitizer Rule
-   * Leave <del> tags
+   * Leave <s> tags
    *
    * @returns {object}
    */
@@ -67,7 +67,7 @@ export default class StrikeInlineTool implements InlineTool {
   }
 
   /**
-   * Wrap range with <del> tag
+   * Wrap range with <s> tag
    *
    * @param {Range} range - range to wrap
    */
@@ -76,7 +76,7 @@ export default class StrikeInlineTool implements InlineTool {
   }
 
   /**
-   * Check selection and set activated state to button if there are <del> tag
+   * Check selection and set activated state to button if there are <s> tag
    *
    * @param {Selection} selection - selection to check
    */
