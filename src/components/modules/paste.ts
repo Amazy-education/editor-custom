@@ -164,7 +164,6 @@ export default class Paste extends Module {
     const types = dataTransfer.types;
     const target = pasteTarget;
 
-    console.log('target', target);
 
     /**
      * In Microsoft Edge types is DOMStringList. So 'contains' is used to check if 'Files' type included
@@ -200,6 +199,7 @@ export default class Paste extends Module {
       htmlData = '<p>' + (htmlData.trim() ? htmlData : plainData) + '</p>';
     }
 
+
     /** Add all tags that can be substituted to sanitizer configuration */
     const toolsTags = Object.keys(this.toolsTags).reduce((result, tag) => {
       result[tag.toLowerCase()] = true;
@@ -227,6 +227,7 @@ export default class Paste extends Module {
    */
   public async processText(data: string, target, isHTML = false): Promise<void> {
     const { Caret, BlockManager } = this.Editor;
+
     const dataToInsert = isHTML ? this.processHTML(data, target) : this.processPlain(data);
 
     if (!dataToInsert.length) {
@@ -525,14 +526,12 @@ export default class Paste extends Module {
 
     wrapper.innerHTML = innerHTML;
 
-
     const nodes = this.getNodes(wrapper);
 
     return nodes
       .map((node) => {
         let content, tool = Tools.defaultTool, isBlock = false;
 
-        console.log(tool);
         switch (node.nodeType) {
           /** If node is a document fragment, use temp wrapper to get innerHTML */
           case Node.DOCUMENT_FRAGMENT_NODE:
@@ -553,14 +552,12 @@ export default class Paste extends Module {
 
         const { tags } = tool.pasteConfig;
 
-        console.log({ tags });
         const toolTags = tags.reduce((result, tag) => {
           result[tag.toLowerCase()] = {};
 
           return result;
         }, {});
         const customConfig = Object.assign({}, toolTags, tool.baseSanitizeConfig);
-
         content.innerHTML = clean(content.innerHTML, customConfig);
 
         const event = this.composePasteEvent('tag', {
@@ -882,7 +879,6 @@ export default class Paste extends Module {
    * @param {PasteEventDetail} detail - event detail
    */
   private composePasteEvent(type: string, detail: PasteEventDetail): PasteEvent {
-    console.log('detail', detail);
 
     return new CustomEvent(type, {
       detail,
