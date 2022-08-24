@@ -21,6 +21,8 @@ interface InlineToolbarNodes {
   buttons: HTMLElement;
   conversionToggler: HTMLElement;
   conversionTogglerContent: HTMLElement;
+  conversionTogglerIcon: HTMLElement;
+  conversionTogglerText: HTMLElement;
   /**
    * Zone below the buttons where Tools can create additional actions by 'renderActions()' method
    * For example, input for the 'link' tool or textarea for the 'comment' tool
@@ -53,6 +55,8 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
     conversionToggler: 'ce-inline-toolbar__dropdown',
     conversionTogglerHidden: 'ce-inline-toolbar__dropdown--hidden',
     conversionTogglerContent: 'ce-inline-toolbar__dropdown-content',
+    conversionTogglerIcon: 'ce-inline-toolbar__dropdown-icon',
+    conversionTogglerText: 'ce-inline-toolbar__dropdown-text',
     togglerAndButtonsWrapper: 'ce-inline-toolbar__toggler-and-button-wrapper',
   };
 
@@ -427,9 +431,13 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
   private addConversionToggler(): void {
     this.nodes.conversionToggler = $.make('div', this.CSS.conversionToggler);
     this.nodes.conversionTogglerContent = $.make('div', this.CSS.conversionTogglerContent);
+    this.nodes.conversionTogglerIcon = $.make('div', this.CSS.conversionTogglerIcon);
+    this.nodes.conversionTogglerText = $.make('div', this.CSS.conversionTogglerText);
 
     const icon = $.svg('toggler-down', 13, 13);
 
+    this.nodes.conversionTogglerContent.appendChild(this.nodes.conversionTogglerIcon);
+    this.nodes.conversionTogglerContent.appendChild(this.nodes.conversionTogglerText);
     this.nodes.conversionToggler.appendChild(this.nodes.conversionTogglerContent);
     this.nodes.conversionToggler.appendChild(icon);
 
@@ -482,8 +490,8 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
      */
     const toolboxSettings = currentBlock.tool.toolbox || {};
 
-    this.nodes.conversionTogglerContent.innerHTML =
-      toolboxSettings.icon ||
+    this.nodes.conversionTogglerIcon.innerHTML = toolboxSettings.icon;
+    this.nodes.conversionTogglerText.innerHTML =
       toolboxSettings.title ||
       _.capitalize(toolName);
   }
