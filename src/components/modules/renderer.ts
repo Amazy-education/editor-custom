@@ -75,6 +75,12 @@ export default class Renderer extends Module {
     const { Tools, BlockManager } = this.Editor;
     const { type: tool, data, tunes, id } = item;
 
+    const addBlockButtonClick = this.config.addBlockButtonClick;
+    const onFocusBlock = this.config.onFocusBlock;
+
+    // console.log('insertBlock config', this.config);
+    // console.log('insertBlock addBlockButtonClick', addBlockButtonClick);
+
     if (Tools.available.has(tool)) {
       try {
         BlockManager.insert({
@@ -82,6 +88,8 @@ export default class Renderer extends Module {
           tool,
           data,
           tunes,
+          addBlockButtonClick,
+          onFocusBlock,
         });
       } catch (error) {
         _.log(`Block «${tool}» skipped because of plugins error`, 'warn', data);

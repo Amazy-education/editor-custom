@@ -156,11 +156,14 @@ export default class Paste extends Module {
    * Handle pasted or dropped data transfer object
    *
    * @param {DataTransfer} dataTransfer - pasted or dropped data transfer object
+   * @param {string} pasteTarget - target of pasted or dropped data transfer object
    * @param {boolean} isDragNDrop - true if data transfer comes from drag'n'drop events
    */
-  public async processDataTransfer(dataTransfer: DataTransfer, isDragNDrop = false): Promise<void> {
+  public async processDataTransfer(dataTransfer: DataTransfer, pasteTarget, isDragNDrop = false): Promise<void> {
     const { Tools } = this.Editor;
     const types = dataTransfer.types;
+    const target = pasteTarget;
+
 
     /**
      * In Microsoft Edge types is DOMStringList. So 'contains' is used to check if 'Files' type included
@@ -196,6 +199,7 @@ export default class Paste extends Module {
       htmlData = '<p>' + (htmlData.trim() ? htmlData : plainData) + '</p>';
     }
 
+
     /** Add all tags that can be substituted to sanitizer configuration */
     const toolsTags = Object.keys(this.toolsTags).reduce((result, tag) => {
       result[tag.toLowerCase()] = true;
@@ -208,9 +212,9 @@ export default class Paste extends Module {
 
     /** If there is no HTML or HTML string is equal to plain one, process it as plain text */
     if (!cleanData.trim() || cleanData.trim() === plainData || !$.isHTMLString(cleanData)) {
-      await this.processText(plainData);
+      await this.processText(plainData, target);
     } else {
-      await this.processText(cleanData, true);
+      await this.processText(cleanData, target, true);
     }
   }
 
@@ -219,10 +223,12 @@ export default class Paste extends Module {
    *
    * @param {string} data - text to process. Can be HTML or plain.
    * @param {boolean} isHTML - if passed string is HTML, this parameter should be true
+   * @param { node } target - target of pasted
    */
-  public async processText(data: string, isHTML = false): Promise<void> {
+  public async processText(data: string, target, isHTML = false): Promise<void> {
     const { Caret, BlockManager } = this.Editor;
-    const dataToInsert = isHTML ? this.processHTML(data) : this.processPlain(data);
+
+    const dataToInsert = isHTML ? this.processHTML(data, target) : this.processPlain(data);
 
     if (!dataToInsert.length) {
       return;
@@ -435,7 +441,7 @@ export default class Paste extends Module {
     }
 
     event.preventDefault();
-    this.processDataTransfer(event.clipboardData);
+    this.processDataTransfer(event.clipboardData, event.target);
 
     BlockManager.clearFocused();
     Toolbar.close();
@@ -451,13 +457,13 @@ export default class Paste extends Module {
 
     let dataToInsert: {type: string; event: PasteEvent}[];
 
+
     dataToInsert = await Promise.all(
       Array
         .from(items)
         .map((item) => this.processFile(item))
     );
     dataToInsert = dataToInsert.filter((data) => !!data);
-
     const isCurrentBlockDefault = BlockManager.currentBlock.tool.isDefault;
     const needToReplaceCurrentBlock = isCurrentBlockDefault && BlockManager.currentBlock.isEmpty;
 
@@ -510,10 +516,11 @@ export default class Paste extends Module {
    * Split HTML string to blocks and return it as array of Block data
    *
    * @param {string} innerHTML - html string to process
+   * @param {string} target - target
    *
    * @returns {PasteData[]}
    */
-  private processHTML(innerHTML: string): PasteData[] {
+  private processHTML(innerHTML: string, target: string): PasteData[] {
     const { Tools } = this.Editor;
     const wrapper = $.make('DIV');
 
@@ -551,7 +558,6 @@ export default class Paste extends Module {
           return result;
         }, {});
         const customConfig = Object.assign({}, toolTags, tool.baseSanitizeConfig);
-
         content.innerHTML = clean(content.innerHTML, customConfig);
 
         const event = this.composePasteEvent('tag', {
@@ -873,6 +879,7 @@ export default class Paste extends Module {
    * @param {PasteEventDetail} detail - event detail
    */
   private composePasteEvent(type: string, detail: PasteEventDetail): PasteEvent {
+
     return new CustomEvent(type, {
       detail,
     }) as PasteEvent;

@@ -129,7 +129,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEvent> {
   public make(): Element {
     this.popover = new Popover({
       className: Toolbox.CSS.toolbox,
-      searchable: true,
+      searchable: false,
       filterLabel: this.i18nLabels.filter,
       nothingFoundLabel: this.i18nLabels.nothingFound,
       items: this.toolboxItemsToBeDisplayed,
@@ -287,6 +287,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEvent> {
         onClick: (e): void => {
           this.toolButtonActivated(tool.name, toolboxItem.data);
         },
+        description: toolboxItem.description,
         secondaryLabel: tool.shortcut ? _.beautifyShortcut(tool.shortcut) : '',
       };
     };

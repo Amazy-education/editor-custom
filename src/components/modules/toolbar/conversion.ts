@@ -88,7 +88,7 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
      */
     this.enableFlipper();
 
-    $.append(this.nodes.wrapper, label);
+    // $.append(this.nodes.wrapper, label);
     $.append(this.nodes.wrapper, this.nodes.tools);
 
     return this.nodes.wrapper;
@@ -318,6 +318,7 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
   private addTool(toolName: string, toolboxItem: ToolboxConfigEntry): void {
     const tool = $.make('div', [ ConversionToolbar.CSS.conversionTool ]);
     const icon = $.make('div', [ ConversionToolbar.CSS.conversionToolIcon ]);
+    const selectIcon = $.svg('tick', 20, 20);
 
     tool.dataset.tool = toolName;
     icon.innerHTML = toolboxItem.icon;

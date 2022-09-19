@@ -681,6 +681,7 @@ export default class UI extends Module<UINodes> {
    * @param {MouseEvent | TouchEvent} event - touch or mouse event
    */
   private documentTouched(event: MouseEvent | TouchEvent): void {
+    console.log('document touched');
     let clickedNode = event.target as HTMLElement;
 
     /**
@@ -700,17 +701,21 @@ export default class UI extends Module<UINodes> {
       /**
        * Renew Current Block
        */
+      console.log('document touched TRY1');
       this.Editor.BlockManager.setCurrentBlockByChildNode(clickedNode);
-
+      console.log('document touched TRY2');
       /**
        * Highlight Current Node
        */
       this.Editor.BlockManager.highlightCurrentNode();
+      console.log('document touched TRY3');
     } catch (e) {
       /**
        * If clicked outside first-level Blocks and it is not RectSelection, set Caret to the last empty Block
        */
+      console.log('document touched CATCH', e);
       if (!this.Editor.RectangleSelection.isRectActivated()) {
+        console.log('document touched CATCH 2');
         this.Editor.Caret.setToTheLastBlock();
       }
     }

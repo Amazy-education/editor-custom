@@ -69,7 +69,8 @@ export default class DeleteTune implements BlockTune {
    */
   public render(): HTMLElement {
     this.nodes.button = $.make('div', [this.CSS.button, this.CSS.buttonDelete], {});
-    this.nodes.button.appendChild($.svg('cross', 12, 12));
+    // this.nodes.button.appendChild($.svg('cross', 12, 12));
+    this.nodes.button.innerHTML = '<svg width="12" height="16" viewBox="0 0 12 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.999959 13.8333C0.999959 14.75 1.74996 15.5 2.66663 15.5H9.33329C10.25 15.5 11 14.75 11 13.8333V5.5C11 4.58333 10.25 3.83333 9.33329 3.83333H2.66663C1.74996 3.83333 0.999959 4.58333 0.999959 5.5V13.8333ZM3.49996 5.5H8.49996C8.95829 5.5 9.33329 5.875 9.33329 6.33333V13C9.33329 13.4583 8.95829 13.8333 8.49996 13.8333H3.49996C3.04163 13.8333 2.66663 13.4583 2.66663 13V6.33333C2.66663 5.875 3.04163 5.5 3.49996 5.5ZM8.91663 1.33333L8.32496 0.741667C8.17496 0.591667 7.95829 0.5 7.74163 0.5H4.25829C4.04163 0.5 3.82496 0.591667 3.67496 0.741667L3.08329 1.33333H0.999959C0.541626 1.33333 0.166626 1.70833 0.166626 2.16667C0.166626 2.625 0.541626 3 0.999959 3H11C11.4583 3 11.8333 2.625 11.8333 2.16667C11.8333 1.70833 11.4583 1.33333 11 1.33333H8.91663Z" fill="#04003D"/></svg>';
     this.api.listeners.on(this.nodes.button, 'click', (event: MouseEvent) => this.handleClick(event), false);
 
     /**

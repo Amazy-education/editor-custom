@@ -67,6 +67,30 @@ export interface Blocks {
   getCurrentBlockIndex(): number;
 
   /**
+   * Set current Block index
+   * @returns {number}
+   */
+  setCurrentBlockIndex(index: number): void;
+
+  /**
+   * Unselect block by index
+   * @returns {number}
+   */
+  unSelectBLockByIndex(index: number): void;
+
+  /**
+   * Set unfocus callback
+   * @returns {number}
+   */
+  setUnfocusCallback(callback: object): void;
+
+  /**
+   * Call unfocus callback
+   * @returns {number}
+   */
+  callUnfocusCallback(): void;
+
+  /**
    * Returns the index of Block by id;
    */
   getBlockIndex(blockId: string): number;

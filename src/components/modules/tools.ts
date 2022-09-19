@@ -4,6 +4,8 @@ import * as _ from '../utils';
 import { SanitizerConfig, ToolConfig, ToolConstructable, ToolSettings } from '../../../types';
 import BoldInlineTool from '../inline-tools/inline-tool-bold';
 import ItalicInlineTool from '../inline-tools/inline-tool-italic';
+import UnderlineInlineTool from '../inline-tools/inline-tool-underline.js';
+import StrikeInlineTool from '../inline-tools/inline-tool-strikethrough.js';
 import LinkInlineTool from '../inline-tools/inline-tool-link';
 import Stub from '../../tools/stub';
 import ToolsFactory from '../tools/factory';
@@ -199,6 +201,14 @@ export default class Tools extends Module {
         class: ItalicInlineTool,
         isInternal: true,
       },
+      underline: {
+        class: UnderlineInlineTool,
+        isInternal: true,
+      },
+      strikethrough: {
+        class: StrikeInlineTool,
+        isInternal: true,
+      },
       link: {
         class: LinkInlineTool,
         isInternal: true,
@@ -216,12 +226,12 @@ export default class Tools extends Module {
         class: MoveUpTune,
         isInternal: true,
       },
-      delete: {
-        class: DeleteTune,
-        isInternal: true,
-      },
       moveDown: {
         class: MoveDownTune,
+        isInternal: true,
+      },
+      delete: {
+        class: DeleteTune,
         isInternal: true,
       },
     };

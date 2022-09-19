@@ -1,9 +1,13 @@
 /* eslint-disable jsdoc/no-undefined-types */
+import Module from '../__module';
+// import { TooltipContent, TooltipOptions } from '../types';
+
 /**
  * Use external module CodeX Tooltip
  */
 import CodeXTooltips from 'codex-tooltip';
-import type { TooltipOptions, TooltipContent } from 'codex-tooltip/types';
+// import { TooltipContent, TooltipOptions } from '../../../../../../Amazy/projects/editor.js/node_modules/codex-tooltip/dist/types';
+import type { TooltipContent, TooltipOptions } from 'codex-tooltip/types';
 
 /**
  * Tooltip

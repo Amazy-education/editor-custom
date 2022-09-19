@@ -25,6 +25,16 @@ export interface ToolboxConfigEntry {
    * May contain overrides for tool default config
    */
   data?: BlockToolData
+
+  /**
+   * Tool name for Toolbox
+   */
+  name?: string;
+
+  /**
+   * Tool description for Toolbox
+   */
+  description?: string;
 }
 
 /**
