@@ -3,7 +3,7 @@ import SelectionUtils from '../selection';
 import $ from '../dom';
 import * as _ from '../utils';
 import { InlineTool, SanitizerConfig } from '../../../types';
-import { I18n, Notifier, Toolbar } from '../../../types/api';
+import { I18n, Toolbar, Tooltip } from '../../../types/api';
 
 /**
  * Link Tool
@@ -36,7 +36,7 @@ export default class LinkInlineTool implements InlineTool {
       a: {
         href: true,
         target: '_blank',
-        rel: 'nofollow',
+        rel: true,
       },
     } as SanitizerConfig;
   }
@@ -60,8 +60,11 @@ export default class LinkInlineTool implements InlineTool {
     buttonActive: 'ce-inline-tool--active',
     buttonModifier: 'ce-inline-tool--link',
     buttonUnlink: 'ce-inline-tool--unlink',
+    buttonHover: 'ce-inline-tool--hover',
     input: 'ce-inline-tool-input',
-    inputShowed: 'ce-inline-tool-input--showed',
+    label: 'ce-inline-tool-label',
+    labelShowed: 'ce-inline-tool-label--showed',
+    cleanButton: 'ce-inline-tool-input-clean--showed',
   };
 
   /**
@@ -70,9 +73,15 @@ export default class LinkInlineTool implements InlineTool {
   private nodes: {
     button: HTMLButtonElement;
     input: HTMLInputElement;
+    label: HTMLLabelElement;
+    cleanButton: HTMLSpanElement;
+    confirmButton: HTMLSpanElement;
   } = {
     button: null,
     input: null,
+    label: null,
+    cleanButton: null,
+    confirmButton: null,
   };
 
   /**
@@ -96,9 +105,9 @@ export default class LinkInlineTool implements InlineTool {
   private inlineToolbar: Toolbar;
 
   /**
-   * Notifier API methods
+   * Tooltip API methods
    */
-  private notifier: Notifier;
+  private tooltip: Tooltip;
 
   /**
    * I18n API
@@ -111,7 +120,7 @@ export default class LinkInlineTool implements InlineTool {
   constructor({ api }) {
     this.toolbar = api.toolbar;
     this.inlineToolbar = api.inlineToolbar;
-    this.notifier = api.notifier;
+    this.tooltip = api.tooltip;
     this.i18n = api.i18n;
     this.selection = new SelectionUtils();
   }
@@ -133,16 +142,63 @@ export default class LinkInlineTool implements InlineTool {
    * Input for the link
    */
   public renderActions(): HTMLElement {
+    this.nodes.label = document.createElement('label') as HTMLLabelElement;
+    this.nodes.label.classList.add(this.CSS.label);
     this.nodes.input = document.createElement('input') as HTMLInputElement;
-    this.nodes.input.placeholder = this.i18n.t('Add a link');
+    this.nodes.input.placeholder = this.i18n.t('Paste a link');
     this.nodes.input.classList.add(this.CSS.input);
-    this.nodes.input.addEventListener('keydown', (event: KeyboardEvent) => {
+    this.nodes.label.appendChild(this.nodes.input);
+    this.nodes.confirmButton = document.createElement('span') as HTMLSpanElement;
+    this.nodes.cleanButton = document.createElement('span') as HTMLSpanElement;
+    this.nodes.confirmButton.appendChild($.svg('tick-big', 24, 24));
+    this.nodes.cleanButton.appendChild($.svg('close', 24, 24));
+
+    this.nodes.label.appendChild(this.nodes.confirmButton);
+    this.nodes.label.appendChild(this.nodes.cleanButton);
+
+    this.nodes.input.addEventListener('keyup', (event: KeyboardEvent) => {
+      if (this.nodes.input.value.length > 0) {
+        this.nodes.cleanButton.classList.add(this.CSS.cleanButton);
+        this.nodes.confirmButton.classList.add(this.CSS.cleanButton);
+      } else {
+        this.nodes.cleanButton.classList.remove(this.CSS.cleanButton);
+        this.nodes.confirmButton.classList.remove(this.CSS.cleanButton);
+      }
       if (event.keyCode === this.ENTER_KEY) {
         this.enterPressed(event);
       }
     });
 
-    return this.nodes.input;
+    this.nodes.confirmButton.addEventListener('mousedown', (event: MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+      this.enterPressed(event);
+    });
+
+    this.nodes.cleanButton.addEventListener('mousedown', (event: MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+      this.nodes.input.value = '';
+      this.unlink();
+      this.nodes.button.classList.remove(this.CSS.buttonUnlink);
+      this.nodes.button.classList.remove(this.CSS.buttonActive);
+      this.nodes.cleanButton.classList.remove(this.CSS.cleanButton);
+      this.nodes.confirmButton.classList.remove(this.CSS.cleanButton);
+    });
+
+    document.addEventListener('click', (event: Event) => {
+      const { target } = event;
+      const currentTarget = (target as Element).closest(`.${this.CSS.button}`);
+
+      if (currentTarget) {
+        this.selection.restore();
+        if (currentTarget !== this.nodes.button && this.inputOpened) {
+          this.closeActions();
+        }
+      }
+    });
+
+    return this.nodes.label;
   }
 
   /**
@@ -194,20 +250,24 @@ export default class LinkInlineTool implements InlineTool {
     const anchorTag = this.selection.findParentTag('A');
 
     if (anchorTag) {
-      this.nodes.button.classList.add(this.CSS.buttonUnlink);
       this.nodes.button.classList.add(this.CSS.buttonActive);
-      this.openActions();
+      this.openActions(true);
 
       /**
        * Fill input value with link href
        */
       const hrefAttr = anchorTag.getAttribute('href');
 
-      this.nodes.input.value = hrefAttr !== 'null' ? hrefAttr : '';
+      if (hrefAttr !== 'null') {
+        this.nodes.cleanButton.classList.add(this.CSS.cleanButton);
+        this.nodes.confirmButton.classList.add(this.CSS.cleanButton);
+        this.nodes.input.value = hrefAttr;
+      } else {
+        this.nodes.input.value = '';
+      }
 
       this.selection.save();
     } else {
-      this.nodes.button.classList.remove(this.CSS.buttonUnlink);
       this.nodes.button.classList.remove(this.CSS.buttonActive);
     }
 
@@ -243,9 +303,12 @@ export default class LinkInlineTool implements InlineTool {
    * @param {boolean} needFocus - on link creation we need to focus input. On editing - nope.
    */
   private openActions(needFocus = false): void {
-    this.nodes.input.classList.add(this.CSS.inputShowed);
+    this.nodes.button.classList.add(this.CSS.buttonHover);
+    this.nodes.label.classList.add(this.CSS.labelShowed);
     if (needFocus) {
-      this.nodes.input.focus();
+      setTimeout(() => {
+        this.nodes.label.focus();
+      });
     }
     this.inputOpened = true;
   }
@@ -270,12 +333,13 @@ export default class LinkInlineTool implements InlineTool {
       currentSelection.restore();
     }
 
-    this.nodes.input.classList.remove(this.CSS.inputShowed);
+    this.nodes.label.classList.remove(this.CSS.labelShowed);
     this.nodes.input.value = '';
     if (clearSavedSelection) {
       this.selection.clearSaved();
     }
     this.inputOpened = false;
+    this.nodes.button.classList.remove(this.CSS.buttonHover);
   }
 
   /**
@@ -283,7 +347,7 @@ export default class LinkInlineTool implements InlineTool {
    *
    * @param {KeyboardEvent} event - enter keydown event
    */
-  private enterPressed(event: KeyboardEvent): void {
+  private enterPressed(event: KeyboardEvent | MouseEvent): void {
     let value = this.nodes.input.value || '';
 
     if (!value.trim()) {
@@ -296,10 +360,12 @@ export default class LinkInlineTool implements InlineTool {
     }
 
     if (!this.validateURL(value)) {
-      this.notifier.show({
-        message: 'Pasted link is not valid.',
-        style: 'error',
+      this.tooltip.show(this.nodes.input, 'The URL is not valid.', {
+        placement: 'top',
       });
+      setTimeout(() => {
+        this.tooltip.hide();
+      }, 1000);
 
       _.log('Incorrect Link pasted', 'warn', value);
 
@@ -310,7 +376,6 @@ export default class LinkInlineTool implements InlineTool {
 
     this.selection.restore();
     this.selection.removeFakeBackground();
-
     this.insertLink(value);
 
     /**
@@ -333,7 +398,14 @@ export default class LinkInlineTool implements InlineTool {
     /**
      * Don't allow spaces
      */
-    return !/\s/.test(str);
+    const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+      '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+
+    return !!pattern.test(str);
   }
 
   /**
@@ -374,7 +446,7 @@ export default class LinkInlineTool implements InlineTool {
         isProtocolRelative = /^\/\/[^/\s]/.test(link);
 
     if (!isInternal && !isAnchor && !isProtocolRelative) {
-      link = 'http://' + link;
+      link = 'https://' + link;
     }
 
     return link;
@@ -389,13 +461,15 @@ export default class LinkInlineTool implements InlineTool {
     /**
      * Edit all link, not selected part
      */
-    const anchorTag = this.selection.findParentTag('A');
+    let anchorTag = this.selection.findParentTag('A');
 
     if (anchorTag) {
       this.selection.expandToTag(anchorTag);
     }
-
     document.execCommand(this.commandLink, false, link);
+    anchorTag = this.selection.findParentTag('A');
+    anchorTag['target'] = '_blank';
+    anchorTag['rel'] = 'noopener noreferrer';
   }
 
   /**
