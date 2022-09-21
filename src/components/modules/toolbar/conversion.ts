@@ -32,7 +32,8 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
       conversionToolbarTools: 'ce-conversion-toolbar__tools',
       conversionToolbarLabel: 'ce-conversion-toolbar__label',
       conversionTool: 'ce-conversion-tool',
-      conversionToolHidden: 'ce-conversion-tool--hidden',
+      conversionToolSelect: 'ce-conversion-tool--select',
+      // conversionToolHidden: 'ce-conversion-tool--hidden',
       conversionToolIcon: 'ce-conversion-tool__icon',
 
       conversionToolFocused: 'ce-conversion-tool--focused',
@@ -323,14 +324,14 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
     tool.dataset.tool = toolName;
     icon.innerHTML = toolboxItem.icon;
 
-    $.append(tool, icon);
+    $.append(tool, [icon, selectIcon]);
     $.append(tool, $.text(I18n.t(I18nInternalNS.toolNames, toolboxItem.title || _.capitalize(toolName))));
 
     $.append(this.nodes.tools, tool);
     this.tools.push({
       name: toolName,
       button: tool,
-      toolboxItem: toolboxItem,
+      toolboxItem,
     });
 
     this.listeners.on(tool, 'click', async () => {
@@ -355,17 +356,18 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
       return entry1.icon === entry2.icon && entry1.title === entry2.title;
     }
 
-    this.tools.forEach(tool => {
-      let hidden = false;
-
+    this.tools.forEach((tool) => {
+      console.log(tool);
       if (currentBlockActiveToolboxEntry) {
         const isToolboxItemActive = isTheSameToolboxEntry(currentBlockActiveToolboxEntry, tool.toolboxItem);
 
-        hidden = (tool.button.dataset.tool === currentBlock.name && isToolboxItemActive);
+        tool.button.classList.remove(ConversionToolbar.CSS.conversionToolSelect);
+        if (isToolboxItemActive) {
+          tool.button.classList.add(ConversionToolbar.CSS.conversionToolSelect);
+        }
       }
 
-      tool.button.hidden = hidden;
-      tool.button.classList.toggle(ConversionToolbar.CSS.conversionToolHidden, hidden);
+      tool.button.hidden = false;
     });
   }
 

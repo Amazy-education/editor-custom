@@ -1,5 +1,5 @@
 import { ToolConfig } from './tool-config';
-import { ToolConstructable, BlockToolData } from './index';
+import { BlockToolData, ToolConstructable } from './index';
 
 /**
  * Tool may specify its toolbox configuration
