@@ -6,7 +6,7 @@ import Flipper from '../../flipper';
 import I18n from '../../i18n';
 import { I18nInternalNS } from '../../i18n/namespace-internal';
 import { clean } from '../../utils/sanitizer';
-import { ToolboxConfigEntry, BlockToolData } from '../../../../types';
+import { BlockToolData, ToolboxConfigEntry } from '../../../../types';
 
 /**
  * HTML Elements used for ConversionToolbar
@@ -357,7 +357,6 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
     }
 
     this.tools.forEach((tool) => {
-      console.log(tool);
       if (currentBlockActiveToolboxEntry) {
         const isToolboxItemActive = isTheSameToolboxEntry(currentBlockActiveToolboxEntry, tool.toolboxItem);
 
