@@ -146,23 +146,22 @@ export default class LinkInlineTool implements InlineTool {
     this.nodes.label.classList.add(this.CSS.label);
     this.nodes.input = document.createElement('input') as HTMLInputElement;
     this.nodes.input.placeholder = this.i18n.t('Paste a link');
+    this.nodes.input.type = 'text';
     this.nodes.input.classList.add(this.CSS.input);
     this.nodes.label.appendChild(this.nodes.input);
     this.nodes.confirmButton = document.createElement('span') as HTMLSpanElement;
     this.nodes.cleanButton = document.createElement('span') as HTMLSpanElement;
-    this.nodes.confirmButton.appendChild($.svg('tick-big', 24, 24));
     this.nodes.cleanButton.appendChild($.svg('close', 24, 24));
+    this.nodes.confirmButton.appendChild($.svg('tick-big', 24, 24));
 
-    this.nodes.label.appendChild(this.nodes.confirmButton);
     this.nodes.label.appendChild(this.nodes.cleanButton);
-
+    this.nodes.label.appendChild(this.nodes.confirmButton);
+    this.nodes.confirmButton.classList.add(this.CSS.cleanButton);
     this.nodes.input.addEventListener('keyup', (event: KeyboardEvent) => {
       if (this.nodes.input.value.length > 0) {
         this.nodes.cleanButton.classList.add(this.CSS.cleanButton);
-        this.nodes.confirmButton.classList.add(this.CSS.cleanButton);
       } else {
         this.nodes.cleanButton.classList.remove(this.CSS.cleanButton);
-        this.nodes.confirmButton.classList.remove(this.CSS.cleanButton);
       }
       if (event.keyCode === this.ENTER_KEY) {
         this.enterPressed(event);
@@ -183,7 +182,6 @@ export default class LinkInlineTool implements InlineTool {
       this.nodes.button.classList.remove(this.CSS.buttonUnlink);
       this.nodes.button.classList.remove(this.CSS.buttonActive);
       this.nodes.cleanButton.classList.remove(this.CSS.cleanButton);
-      this.nodes.confirmButton.classList.remove(this.CSS.cleanButton);
     });
 
     document.addEventListener('click', (event: Event) => {
@@ -216,11 +214,12 @@ export default class LinkInlineTool implements InlineTool {
        */
       if (!this.inputOpened) {
         /** Create blue background instead of selection */
-        // this.selection.setFakeBackground();
+        this.selection.setFakeBackground();
+
         this.selection.save();
       } else {
         this.selection.restore();
-        // this.selection.removeFakeBackground();
+        this.selection.removeFakeBackground();
       }
       const parentAnchor = this.selection.findParentTag('A');
 
