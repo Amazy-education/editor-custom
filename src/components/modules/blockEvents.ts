@@ -244,7 +244,7 @@ export default class BlockEvents extends Module {
      * If enter has been pressed at the start of the text, just insert paragraph Block above
      */
     if (this.Editor.Caret.isAtStart && !this.Editor.BlockManager.currentBlock.hasMedia) {
-      this.Editor.BlockManager.insertDefaultBlockAtIndex(this.Editor.BlockManager.currentBlockIndex);
+      this.Editor.BlockManager.insertDefaultBlockAtIndex(this.Editor.BlockManager.currentBlockIndex, false, 'Enter');
     } else {
       /**
        * Split the Current Block into two blocks

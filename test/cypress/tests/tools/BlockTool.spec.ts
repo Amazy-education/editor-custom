@@ -64,7 +64,7 @@ describe('BlockTool', () => {
         option1: 'option1',
         option2: 'option2',
       },
-      inlineToolbar: ['link', 'bold'],
+      inlineToolbar: ['link'],
       tunes: ['anchor', 'favorites'],
       shortcut: 'CMD+SHIFT+B',
       toolbox: {

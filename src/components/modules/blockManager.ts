@@ -370,6 +370,7 @@ export default class BlockManager extends Module {
      */
     this.blockDidMutated(BlockMutationType.Added, block, {
       index: newIndex,
+      trigger: 'ui_plus',
     });
 
     if (needToFocus) {
@@ -433,12 +434,13 @@ export default class BlockManager extends Module {
    *
    * @param {number} index - index where Block should be inserted
    * @param {boolean} needToFocus - if true, updates current Block index
+   * @param {string} trigger - tell what call insert new Block
    *
    * TODO: Remove method and use insert() with index instead (?)
    *
    * @returns {Block} inserted Block
    */
-  public insertDefaultBlockAtIndex(index: number, needToFocus = false): Block {
+  public insertDefaultBlockAtIndex(index: number, needToFocus = false, trigger = ''): Block {
     const block = this.composeBlock({ tool: this.config.defaultBlock });
 
     this._blocks[index] = block;
@@ -448,6 +450,7 @@ export default class BlockManager extends Module {
      */
     this.blockDidMutated(BlockMutationType.Added, block, {
       index,
+      trigger,
     });
 
     if (needToFocus) {

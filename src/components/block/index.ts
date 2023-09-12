@@ -4,12 +4,13 @@ import {
   BlockToolData,
   BlockTune as IBlockTune,
   SanitizerConfig,
-  ToolConfig,
-  ToolboxConfigEntry
+  ToolboxConfigEntry,
+  ToolConfig
 } from '../../../types';
 
 import { SavedData } from '../../../types/data-formats';
 import $ from '../dom';
+// eslint-disable-next-line import/no-duplicates
 import * as _ from '../utils';
 import ApiModules from '../modules/api';
 import BlockAPI from './api';
@@ -23,8 +24,8 @@ import EventsDispatcher from '../utils/events';
 
 import {isNumber} from '../utils';
 
-type AddBlockButtonClickInterface = ( index: number ) => void;
-type OnFocusBlockInterface = ( index: number, unfocusCallback: object) => void;
+type AddBlockButtonClickInterface = (index: number) => void;
+type OnFocusBlockInterface = (index: number, unfocusCallback: object) => void;
 
 /**
  * Interface describes Block class constructor argument
@@ -261,12 +262,14 @@ export default class Block extends EventsDispatcher<BlockEvents> {
 
   /**
    * Callbak for Add block button
+   *
    * @private
    */
   private addBlockButtonClick: AddBlockButtonClickInterface;
 
   /**
    * Callbak for Add block button
+   *
    * @private
    */
   private onFocusBlock: OnFocusBlockInterface;
@@ -278,8 +281,8 @@ export default class Block extends EventsDispatcher<BlockEvents> {
    * @param {BlockToolConstructable} options.tool — block's tool
    * @param options.api - Editor API module for pass it to the Block Tunes
    * @param {boolean} options.readOnly - Read-Only flag
-   * @param {function} options.addBlockButtonClick - Callback for add button
-   * @param {function} options.onFocusBlock - Callback for block focus
+   * @param {Function} options.addBlockButtonClick - Callback for add button
+   * @param {Function} options.onFocusBlock - Callback for block focus
    */
   constructor({
     id = _.generateBlockId(),
@@ -301,6 +304,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     this.blockAPI = new BlockAPI(this);
     this.addBlockButtonClick = addBlockButtonClick;
     // this.onFocusBlock = onFocusBlock;
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const onFocusBlockFunc = (n, unfocusCallback?) => {
       // rrr this.api.methods.blocks.callUnfocusCallback();
 
@@ -309,7 +313,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
       // if (n) {
       // rrr this.api.methods.blocks.setCurrentBlockIndex(n);
       // }
-// 11
+      // 11
       if (unfocusCallback) {
         // rrr this.api.methods.blocks.setUnfocusCallback(unfocusCallback);
       }
@@ -317,13 +321,13 @@ export default class Block extends EventsDispatcher<BlockEvents> {
 
       // if (holder)
       //   console.log(holder.holder);
-    }
+    };
 
     if (onFocusBlock) {
 
       // console.log('check focus: exist');
     } else {
-      onFocusBlock = onFocusBlockFunc
+      onFocusBlock = onFocusBlockFunc;
       // console.log('check focus: NO exist');
     }
 
@@ -857,6 +861,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
         contentNode = $.make('div', Block.CSS.content),
         pluginsContent = this.toolInstance.render();
 
+    wrapper.dataset.id = this.id;
     contentNode.appendChild(pluginsContent);
 
     /**
@@ -888,7 +893,8 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     // console.log('this.blockAPI', this);
 
     if (this.addBlockButtonClick) {
-      const addBtn = this.getAddBtn()
+      const addBtn = this.getAddBtn();
+
       wrapper.appendChild(addBtn);
     }
 
@@ -897,14 +903,15 @@ export default class Block extends EventsDispatcher<BlockEvents> {
 
   private getAddBtn(): HTMLDivElement {
     const wrapper = $.make('div', Block.CSS.addBlockWrapper) as HTMLDivElement,
-          btn = $.make('span', Block.CSS.addBlockBtn),
-          text = $.make('span', Block.CSS.addBlockText),
-          btnClickSquare = $.make('span', Block.CSS.addBlockBtnClickSquare),
-          line = $.make('span', Block.CSS.addBlockLine);
+        btn = $.make('span', Block.CSS.addBlockBtn),
+        text = $.make('span', Block.CSS.addBlockText),
+        btnClickSquare = $.make('span', Block.CSS.addBlockBtnClickSquare),
+        line = $.make('span', Block.CSS.addBlockLine);
 
     btnClickSquare.onclick = () => {
       // this.api.methods.blocks.insert();
       const currentBlockIndex = this.api.methods.blocks.getCurrentBlockIndex();
+
       // console.log('btnClickSquare.onclick', currentBlockIndex);
       this.addBlockButtonClick(currentBlockIndex);
     };
@@ -985,7 +992,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
               .from(parentBlockContainer.children)
               .findIndex((n) => {
                 // console.log('findIndex', n, parentBlock);
-                return n === parentBlock
+                return n === parentBlock;
               });
           }
         }
@@ -1008,8 +1015,7 @@ export default class Block extends EventsDispatcher<BlockEvents> {
           // console.log('unFocusCallback holder', holder.holder);
           // holder.selected = false;
         }
-      }
-
+      };
 
       // rrr this.onFocusBlock(index, unFocusCallback);
       // this.onFocusBlock(index, null);
