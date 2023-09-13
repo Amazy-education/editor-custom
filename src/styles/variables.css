@@ -34,6 +34,7 @@
 
   /**
    * Gray border, loaders
+   * @deprecated — use --color-line-gray instead
    */
   --color-gray-border: rgba(201, 201, 204, 0.48);
 
@@ -61,6 +62,13 @@
   --toolbox-buttons-size--mobile: 36px;
 
   /**
+   * Size of svg icons got from the CodeX Icons pack
+   */
+  --icon-size: 20px;
+  --icon-size--mobile: 28px;
+
+
+  /**
    * The main `.cdx-block` wrapper has such vertical paddings
    * And the Block Actions toggler too
    */
@@ -70,8 +78,9 @@
    * Confirm deletion bg
    */
   --color-confirm: #e24a4a;
+  --color-line-gray: #EFF0F1;
 
-  --overlay-pane: {
+  --overlay-pane {
     position: absolute;
     background-color: #fff;
     border: 1px solid rgba(37, 37, 92, 0.1);
@@ -101,15 +110,28 @@
     }
   };
 
+  --button-focused {
+    box-shadow: inset 0 0 0px 1px rgba(7, 161, 227, 0.08);
   --button-focused: {
     box-shadow: inset 0 0 0 1px rgba(7, 161, 227, 0.08);
     background: rgba(34, 186, 255, 0.08) !important;
   };
 
+  --button-active {
+    background: rgba(56, 138, 229, 0.1);
+    color:  var(--color-active-icon);
+  };
+
+  --button-disabled {
+    color: var(--grayText);
+    cursor: default;
+    pointer-events: none;
+  }
+
   /**
    * Styles for Toolbox Buttons and Plus Button
    */
-  --toolbox-button: {
+  --toolbox-button {
     color: var(--color-dark);
     cursor: pointer;
     width: var(--toolbox-buttons-size--width);
@@ -213,28 +235,33 @@
   /**
    * Tool icon with border
    */
-  --tool-icon: {
+  --tool-icon {
     display: inline-flex;
     width: var(--toolbox-buttons-size);
     height: var(--toolbox-buttons-size);
-    border: 1px solid var(--color-gray-border);
+    box-shadow: 0 0 0 1px var(--color-gray-border);
     border-radius: 5px;
     align-items: center;
     justify-content: center;
     background: #fff;
-    box-sizing: border-box;
+    box-sizing: content-box;
     flex-shrink: 0;
     margin-right: 10px;
+
+    svg {
+      width: var(--icon-size);
+      height: var(--icon-size);
+    }
 
     @media (--mobile) {
       width: var(--toolbox-buttons-size--mobile);
       height: var(--toolbox-buttons-size--mobile);
       border-radius: 8px;
-    }
 
-    svg {
-      width: 12px;
-      height: 12px;
+      svg {
+        width: var(--icon-size--mobile);
+        height: var(--icon-size--mobile);
+      }
     }
   }
 }

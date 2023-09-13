@@ -1,9 +1,10 @@
 import { BlockAPI as BlockAPIInterface, Blocks } from '../../../../types/api';
-import { BlockToolData, OutputData, ToolConfig } from '../../../../types';
+import { BlockToolData, OutputBlockData, OutputData, ToolConfig } from '../../../../types';
 import * as _ from './../../utils';
 import BlockAPI from '../../block/api';
 import Module from '../../__module';
 import Block from '../../block';
+import { capitalize } from './../../utils';
 
 /**
  * @class BlocksAPI
@@ -17,13 +18,13 @@ export default class BlocksAPI extends Module {
    */
   public get methods(): Blocks {
     return {
-      clear: (): void => this.clear(),
+      clear: (): Promise<void> => this.clear(),
       render: (data: OutputData): Promise<void> => this.render(data),
       renderFromHTML: (data: string): Promise<void> => this.renderFromHTML(data),
       delete: (index?: number): void => this.delete(index),
       swap: (fromIndex: number, toIndex: number): void => this.swap(fromIndex, toIndex),
       move: (toIndex: number, fromIndex?: number): void => this.move(toIndex, fromIndex),
-      getBlockByIndex: (index: number): BlockAPIInterface | void => this.getBlockByIndex(index),
+      getBlockByIndex: (index: number): BlockAPIInterface | undefined => this.getBlockByIndex(index),
       getById: (id: string): BlockAPIInterface | null => this.getById(id),
       getCurrentBlockIndex: (): number => this.getCurrentBlockIndex(),
       unSelectBLockByIndex: (index): void => this.unSelectBLockByIndex(index),
@@ -35,8 +36,10 @@ export default class BlocksAPI extends Module {
       stretchBlock: (index: number, status = true): void => this.stretchBlock(index, status),
       insertNewBlock: (): void => this.insertNewBlock(),
       insert: this.insert,
+      insertMany: this.insertMany,
       update: this.update,
       composeBlockData: this.composeBlockData,
+      convert: this.convert,
     };
   }
 
@@ -100,7 +103,6 @@ export default class BlocksAPI extends Module {
    * Returns the index of Block by id;
    *
    * @param id - block id
-   * @returns {number}
    */
   public getBlockIndex(id: string): number | undefined {
     const block = this.Editor.BlockManager.getBlockById(id);
@@ -119,7 +121,7 @@ export default class BlocksAPI extends Module {
    *
    * @param {number} index - index to get
    */
-  public getBlockByIndex(index: number): BlockAPIInterface | void {
+  public getBlockByIndex(index: number): BlockAPIInterface | undefined {
     const block = this.Editor.BlockManager.getBlockByIndex(index);
 
     if (block === undefined) {
@@ -180,9 +182,11 @@ export default class BlocksAPI extends Module {
    *
    * @param {number} blockIndex - index of Block to delete
    */
-  public delete(blockIndex?: number): void {
+  public delete(blockIndex: number = this.Editor.BlockManager.currentBlockIndex): void {
     try {
-      this.Editor.BlockManager.removeBlock(blockIndex);
+      const block = this.Editor.BlockManager.getBlockByIndex(blockIndex);
+
+      this.Editor.BlockManager.removeBlock(block);
     } catch (e) {
       _.logLabeled(e, 'warn');
 
@@ -210,8 +214,8 @@ export default class BlocksAPI extends Module {
   /**
    * Clear Editor's area
    */
-  public clear(): void {
-    this.Editor.BlockManager.clear(true);
+  public async clear(): Promise<void> {
+    await this.Editor.BlockManager.clear(true);
     this.Editor.InlineToolbar.close();
   }
 
@@ -220,10 +224,21 @@ export default class BlocksAPI extends Module {
    *
    * @param {OutputData} data — Saved Editor data
    */
-  public render(data: OutputData): Promise<void> {
-    this.Editor.BlockManager.clear();
+  public async render(data: OutputData): Promise<void> {
+    if (data === undefined || data.blocks === undefined) {
+      throw new Error('Incorrect data passed to the render() method');
+    }
 
-    return this.Editor.Renderer.render(data.blocks);
+    /**
+     * Semantic meaning of the "render" method: "Display the new document over the existing one that stays unchanged"
+     * So we need to disable modifications observer temporarily
+     */
+    this.Editor.ModificationsObserver.disable();
+
+    await this.Editor.BlockManager.clear();
+    await this.Editor.Renderer.render(data.blocks);
+
+    this.Editor.ModificationsObserver.enable();
   }
 
   /**
@@ -243,7 +258,6 @@ export default class BlocksAPI extends Module {
    *
    * @param {number} index - index of Block to stretch
    * @param {boolean} status - true to enable, false to disable
-   *
    * @deprecated Use BlockAPI interface to stretch Blocks
    */
   public stretchBlock(index: number, status = true): void {
@@ -271,16 +285,20 @@ export default class BlocksAPI extends Module {
    * @param {number?} index — index where to insert new Block
    * @param {boolean?} needToFocus - flag to focus inserted Block
    * @param replace - pass true to replace the Block existed under passed index
+   * @param {string} id — An optional id for the new block. If omitted then the new id will be generated
    */
   public insert = (
     type: string = this.config.defaultBlock,
     data: BlockToolData = {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
     config: ToolConfig = {},
     index?: number,
     needToFocus?: boolean,
-    replace?: boolean
+    replace?: boolean,
+    id?: string
   ): BlockAPIInterface => {
     const insertedBlock = this.Editor.BlockManager.insert({
+      id,
       tool: type,
       data,
       index,
@@ -289,7 +307,7 @@ export default class BlocksAPI extends Module {
     });
 
     return new BlockAPI(insertedBlock);
-  }
+  };
 
   /**
    * Creates data of an empty block with a passed type.
@@ -307,14 +325,13 @@ export default class BlocksAPI extends Module {
     });
 
     return block.data;
-  }
+  };
 
   /**
    * Insert new Block
    * After set caret to this Block
    *
    * @todo remove in 3.0.0
-   *
    * @deprecated with insert() method
    */
   public insertNewBlock(): void {
@@ -329,25 +346,103 @@ export default class BlocksAPI extends Module {
    * @param id - id of the block to update
    * @param data - the new data
    */
-  public update = (id: string, data: BlockToolData): void => {
+  public update = async (id: string, data: Partial<BlockToolData>): Promise<BlockAPIInterface> => {
     const { BlockManager } = this.Editor;
     const block = BlockManager.getBlockById(id);
 
-    if (!block) {
-      _.log('blocks.update(): Block with passed id was not found', 'warn');
-
-      return;
+    if (block === undefined) {
+      throw new Error(`Block with id "${id}" not found`);
     }
 
-    const blockIndex = BlockManager.getBlockIndex(block);
+    const updatedBlock = await BlockManager.update(block, data);
 
-    BlockManager.insert({
-      id: block.id,
-      tool: block.name,
-      data,
-      index: blockIndex,
-      replace: true,
-      tunes: block.tunes,
+    // we cast to any because our BlockAPI has no "new" signature
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new (BlockAPI as any)(updatedBlock);
+  };
+
+  /**
+   * Converts block to another type. Both blocks should provide the conversionConfig.
+   *
+   * @param id - id of the existing block to convert. Should provide 'conversionConfig.export' method
+   * @param newType - new block type. Should provide 'conversionConfig.import' method
+   * @param dataOverrides - optional data overrides for the new block
+   * @throws Error if conversion is not possible
+   */
+  private convert = (id: string, newType: string, dataOverrides?: BlockToolData): void => {
+    const { BlockManager, Tools } = this.Editor;
+    const blockToConvert = BlockManager.getBlockById(id);
+
+    if (!blockToConvert) {
+      throw new Error(`Block with id "${id}" not found`);
+    }
+
+    const originalBlockTool = Tools.blockTools.get(blockToConvert.name);
+    const targetBlockTool = Tools.blockTools.get(newType);
+
+    if (!targetBlockTool) {
+      throw new Error(`Block Tool with type "${newType}" not found`);
+    }
+
+    const originalBlockConvertable = originalBlockTool?.conversionConfig?.export !== undefined;
+    const targetBlockConvertable = targetBlockTool.conversionConfig?.import !== undefined;
+
+    if (originalBlockConvertable && targetBlockConvertable) {
+      BlockManager.convert(blockToConvert, newType, dataOverrides);
+    } else {
+      const unsupportedBlockTypes = [
+        !originalBlockConvertable ? capitalize(blockToConvert.name) : false,
+        !targetBlockConvertable ? capitalize(newType) : false,
+      ].filter(Boolean).join(' and ');
+
+      throw new Error(`Conversion from "${blockToConvert.name}" to "${newType}" is not possible. ${unsupportedBlockTypes} tool(s) should provide a "conversionConfig"`);
+    }
+  };
+
+
+  /**
+   * Inserts several Blocks to a specified index
+   *
+   * @param blocks - blocks data to insert
+   * @param index - index to insert the blocks at
+   */
+  private insertMany = (
+    blocks: OutputBlockData[],
+    index: number = this.Editor.BlockManager.blocks.length - 1
+  ): BlockAPIInterface[] => {
+    this.validateIndex(index);
+
+    const blocksToInsert = blocks.map(({ id, type, data }) => {
+      return this.Editor.BlockManager.composeBlock({
+        id,
+        tool: type || (this.config.defaultBlock as string),
+        data,
+      });
     });
+
+    this.Editor.BlockManager.insertMany(blocksToInsert, index);
+
+    // we cast to any because our BlockAPI has no "new" signature
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return blocksToInsert.map((block) => new (BlockAPI as any)(block));
+  };
+
+  /**
+   * Validated block index and throws an error if it's invalid
+   *
+   * @param index - index to validate
+   */
+  private validateIndex(index: unknown): void {
+    if (typeof index !== 'number') {
+      throw new Error('Index should be a number');
+    }
+
+    if (index < 0) {
+      throw new Error(`Index should be greater than or equal to 0`);
+    }
+
+    if (index === null) {
+      throw new Error(`Index should be greater than or equal to 0`);
+    }
   }
 }

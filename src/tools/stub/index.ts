@@ -1,5 +1,6 @@
 import $ from '../../components/dom';
 import { API, BlockTool, BlockToolConstructorOptions, BlockToolData } from '../../../types';
+import { IconWarning } from '@codexteam/icons';
 
 export interface StubData extends BlockToolData {
   title: string;
@@ -92,7 +93,7 @@ export default class Stub implements BlockTool {
    */
   private make(): HTMLElement {
     const wrapper = $.make('div', this.CSS.wrapper);
-    const icon = $.svg('sad-face', 52, 52);
+    const icon = IconWarning;
     const infoContainer = $.make('div', this.CSS.info);
     const title = $.make('div', this.CSS.title, {
       textContent: this.title,
@@ -101,7 +102,7 @@ export default class Stub implements BlockTool {
       textContent: this.subtitle,
     });
 
-    wrapper.appendChild(icon);
+    wrapper.innerHTML = icon;
 
     infoContainer.appendChild(title);
     infoContainer.appendChild(subtitle);

@@ -19,7 +19,6 @@ interface Element {
  * otherwise, returns false.
  *
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Element/matches#Polyfill}
- *
  * @param {string} s - selector
  */
 if (!Element.prototype.matches) {
@@ -46,7 +45,6 @@ if (!Element.prototype.matches) {
  * If there isn't such an ancestor, it returns null.
  *
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Element/closest#Polyfill}
- *
  * @param {string} s - selector
  */
 if (!Element.prototype.closest) {
@@ -76,7 +74,6 @@ if (!Element.prototype.closest) {
  * DOMString objects are inserted as equivalent Text nodes.
  *
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/prepend#Polyfill}
- *
  * @param {Node | Node[] | string | string[]} nodes - nodes to prepend
  */
 if (!Element.prototype.prepend) {
@@ -139,3 +136,27 @@ if (!Element.prototype.scrollIntoViewIfNeeded) {
     }
   };
 }
+
+/**
+ * RequestIdleCallback polyfill (shims)
+ *
+ * @see https://developer.chrome.com/blog/using-requestidlecallback/
+ * @param cb - callback to be executed when the browser is idle
+ */
+window.requestIdleCallback = window.requestIdleCallback || function (cb) {
+  const start = Date.now();
+
+  return setTimeout(function () {
+    cb({
+      didTimeout: false,
+      timeRemaining: function () {
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        return Math.max(0, 50 - (Date.now() - start));
+      },
+    });
+  }, 1);
+};
+
+window.cancelIdleCallback = window.cancelIdleCallback || function (id) {
+  clearTimeout(id);
+};

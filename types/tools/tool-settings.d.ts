@@ -1,5 +1,6 @@
 import { ToolConfig } from './tool-config';
 import { BlockToolData, ToolConstructable } from './index';
+import { PopoverItem } from '../configs';
 
 /**
  * Tool may specify its toolbox configuration
@@ -25,6 +26,13 @@ export interface ToolboxConfigEntry {
    * May contain overrides for tool default config
    */
   data?: BlockToolData
+}
+
+
+/**
+ * Represents single Tunes Menu item
+ */
+export type TunesMenuConfigItem = PopoverItem & {
 
   /**
    * Tool name for Toolbox
@@ -35,7 +43,31 @@ export interface ToolboxConfigEntry {
    * Tool description for Toolbox
    */
   description?: string;
+  /**
+   * Tune displayed text.
+   */
+  title?: string;
+
+  /**
+   * Tune displayed text.
+   * Alias for title property
+   *
+   * @deprecated - use title property instead
+   */
+  label?: string
+
+  /**
+   * Menu item parameters that should be applied on item activation.
+   * May be used to ask user for confirmation before executing menu item activation handler.
+   */
+  confirmation?: TunesMenuConfigItem;
 }
+
+/**
+ * Tool may specify its tunes configuration
+ * that can contain either one or multiple entries
+ */
+export type TunesMenuConfig = TunesMenuConfigItem | TunesMenuConfigItem[];
 
 /**
  * Object passed to the Tool's constructor by {@link EditorConfig#tools}

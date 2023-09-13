@@ -1,9 +1,8 @@
 import SelectionUtils from '../selection';
-
-import $ from '../dom';
 import * as _ from '../utils';
-import { InlineTool, SanitizerConfig } from '../../../types';
-import { I18n, Toolbar, Tooltip } from '../../../types/api';
+import { API, InlineTool, SanitizerConfig } from '../../../types';
+import { I18n, InlineToolbar, Tooltip, Toolbar } from '../../../types/api';
+import { IconLink, IconUnlink } from '@codexteam/icons';
 
 /**
  * Link Tool
@@ -102,7 +101,7 @@ export default class LinkInlineTool implements InlineTool {
   /**
    * Available inline toolbar methods (open/close)
    */
-  private inlineToolbar: Toolbar;
+  private inlineToolbar: InlineToolbar;
 
   /**
    * Tooltip API methods
@@ -115,9 +114,10 @@ export default class LinkInlineTool implements InlineTool {
   private i18n: I18n;
 
   /**
-   * @param {API} api - Editor.js API
+   * @param api - Editor.js API
    */
-  constructor({ api }) {
+  // TODO Check notifier & tooltip
+  constructor({ api }: { api: API }) {
     this.toolbar = api.toolbar;
     this.inlineToolbar = api.inlineToolbar;
     this.tooltip = api.tooltip;
@@ -132,8 +132,8 @@ export default class LinkInlineTool implements InlineTool {
     this.nodes.button = document.createElement('button') as HTMLButtonElement;
     this.nodes.button.type = 'button';
     this.nodes.button.classList.add(this.CSS.button, this.CSS.buttonModifier);
-    this.nodes.button.appendChild($.svg('link', 24, 24));
-    this.nodes.button.appendChild($.svg('unlink', 24, 24));
+    // TODO fix icon
+    this.nodes.button.innerHTML = IconLink;
 
     return this.nodes.button;
   }
@@ -242,13 +242,13 @@ export default class LinkInlineTool implements InlineTool {
 
   /**
    * Check selection and set activated state to button if there are <a> tag
-   *
-   * @param {Selection} selection - selection to check
    */
-  public checkState(selection?: Selection): boolean {
+  public checkState(): boolean {
     const anchorTag = this.selection.findParentTag('A');
 
     if (anchorTag) {
+      this.nodes.button.innerHTML = IconUnlink;
+      this.nodes.button.classList.add(this.CSS.buttonUnlink);
       this.nodes.button.classList.add(this.CSS.buttonActive);
       this.openActions(true);
 
@@ -267,6 +267,8 @@ export default class LinkInlineTool implements InlineTool {
 
       this.selection.save();
     } else {
+      this.nodes.button.innerHTML = IconLink;
+      this.nodes.button.classList.remove(this.CSS.buttonUnlink);
       this.nodes.button.classList.remove(this.CSS.buttonActive);
     }
 

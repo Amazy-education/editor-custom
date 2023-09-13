@@ -1,14 +1,15 @@
-@import './variables';
+@import './variables.css';
 @import './ui.css';
-@import './toolbar';
+@import './toolbar.css';
 @import './toolbox.css';
-@import './inline-toolbar';
-@import './conversion-toolbar';
-@import './settings';
+@import './inline-toolbar.css';
+@import './conversion-toolbar.css';
+@import './settings.css';
 @import './block.css';
 @import './animations.css';
 @import './export.css';
 @import './stub.css';
-@import './rtl.scss';
-@import './popover';
+@import './rtl.css';
 @import './input.css';
+@import './popover.css';
+

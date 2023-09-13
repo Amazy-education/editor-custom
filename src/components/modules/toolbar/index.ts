@@ -5,28 +5,27 @@ import I18n from '../../i18n';
 import { I18nInternalNS } from '../../i18n/namespace-internal';
 import Tooltip from '../../utils/tooltip';
 import { ModuleConfig } from '../../../types-internal/module-config';
-import { BlockAPI } from '../../../../types';
 import Block from '../../block';
 import Toolbox, { ToolboxEvent } from '../../ui/toolbox';
+import { IconMenu, IconPlus } from '@codexteam/icons';
+import { BlockHovered } from '../../events/BlockHovered';
 
 /**
  * @todo Tab on non-empty block should open Block Settings of the hoveredBlock (not where caret is set)
  *          - make Block Settings a standalone module
- *
  * @todo - Keyboard-only mode bug:
  *         press Tab, flip to the Checkbox. press Enter (block will be added), Press Tab
  *         (Block Tunes will be opened with Move up focused), press Enter, press Tab ———— both Block Tunes and Toolbox will be opened
- *
- * @todo TESTCASE - show toggler after opening and closing the Inline Toolbar
- * @todo TESTCASE - Click outside Editor holder should close Toolbar and Clear Focused blocks
- * @todo TESTCASE - Click inside Editor holder should close Toolbar and Clear Focused blocks
- * @todo TESTCASE - Click inside Redactor zone when Block Settings are opened:
+ * @todo TEST CASE - show toggler after opening and closing the Inline Toolbar
+ * @todo TEST CASE - Click outside Editor holder should close Toolbar and Clear Focused blocks
+ * @todo TEST CASE - Click inside Editor holder should close Toolbar and Clear Focused blocks
+ * @todo TEST CASE - Click inside Redactor zone when Block Settings are opened:
  *                  - should close Block Settings
  *                  - should not close Toolbar
  *                  - should move Toolbar to the clicked Block
- * @todo TESTCASE - Toolbar should be closed on the Cross Block Selection
- * @todo TESTCASE - Toolbar should be closed on the Rectangle Selection
- * @todo TESTCASE - If Block Settings or Toolbox are opened, the Toolbar should not be moved by Bocks hovering
+ * @todo TEST CASE - Toolbar should be closed on the Cross Block Selection
+ * @todo TEST CASE - Toolbar should be closed on the Rectangle Selection
+ * @todo TEST CASE - If Block Settings or Toolbox are opened, the Toolbar should not be moved by Bocks hovering
  */
 
 /**
@@ -78,7 +77,6 @@ interface ToolbarNodes {
  *
  * @class
  * @classdesc Toolbar module
- *
  * @typedef {Toolbar} Toolbar
  * @property {object} nodes - Toolbar nodes
  * @property {Element} nodes.wrapper        - Toolbar main element
@@ -105,8 +103,9 @@ export default class Toolbar extends Module<ToolbarNodes> {
 
   /**
    * Toolbox class instance
+   * It will be created in requestIdleCallback so it can be null in some period of time
    */
-  private toolboxInstance: Toolbox;
+  private toolboxInstance: Toolbox | null = null;
 
   /**
    * @class
@@ -157,18 +156,27 @@ export default class Toolbar extends Module<ToolbarNodes> {
    * Public interface for accessing the Toolbox
    */
   public get toolbox(): {
-    opened: boolean;
+    opened: boolean | undefined; // undefined is for the case when Toolbox is not initialized yet
     close: () => void;
     open: () => void;
     toggle: () => void;
-    hasFocus: () => boolean;
+    hasFocus: () => boolean | undefined;
     } {
     return {
-      opened: this.toolboxInstance.opened,
-      close: (): void => {
-        this.toolboxInstance.close();
+      opened: this.toolboxInstance?.opened,
+      close: () => {
+        this.toolboxInstance?.close();
       },
-      open: (): void => {
+      open: () => {
+        /**
+         * If Toolbox is not initialized yet, do nothing
+         */
+        if (this.toolboxInstance === null)  {
+          _.log('toolbox.open() called before initialization is finished', 'warn');
+
+          return;
+        }
+
         /**
          * Set current block to cover the case when the Toolbar showed near hovered Block but caret is set to another Block.
          */
@@ -176,8 +184,19 @@ export default class Toolbar extends Module<ToolbarNodes> {
 
         this.toolboxInstance.open();
       },
-      toggle: (): void => this.toolboxInstance.toggle(),
-      hasFocus: (): boolean => this.toolboxInstance.hasFocus(),
+      toggle: () => {
+        /**
+         * If Toolbox is not initialized yet, do nothing
+         */
+        if (this.toolboxInstance === null)  {
+          _.log('toolbox.toggle() called before initialization is finished', 'warn');
+
+          return;
+        }
+
+        this.toolboxInstance.toggle();
+      },
+      hasFocus: () => this.toolboxInstance?.hasFocus(),
     };
   }
 
@@ -212,8 +231,10 @@ export default class Toolbar extends Module<ToolbarNodes> {
    */
   public toggleReadOnly(readOnlyEnabled: boolean): void {
     if (!readOnlyEnabled) {
-      this.drawUI();
-      this.enableModuleBindings();
+      window.requestIdleCallback(() => {
+        this.drawUI();
+        this.enableModuleBindings();
+      }, { timeout: 2000 });
     } else {
       this.destroy();
       this.Editor.BlockSettings.destroy();
@@ -228,10 +249,24 @@ export default class Toolbar extends Module<ToolbarNodes> {
    */
   public moveAndOpen(block: Block = this.Editor.BlockManager.currentBlock): void {
     /**
+     * Some UI elements creates inside requestIdleCallback, so the can be not ready yet
+     */
+    if (this.toolboxInstance === null)  {
+      _.log('Can\'t open Toolbar since Editor initialization is not finished yet', 'warn');
+
+      return;
+    }
+
+    /**
      * Close Toolbox when we move toolbar
      */
-    this.toolboxInstance.close();
-    this.Editor.BlockSettings.close();
+    if (this.toolboxInstance.opened) {
+      this.toolboxInstance.close();
+    }
+
+    if (this.Editor.BlockSettings.opened) {
+      this.Editor.BlockSettings.close();
+    }
 
     /**
      * If no one Block selected as a Current
@@ -291,7 +326,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
 
     /** Close components */
     this.blockActions.hide();
-    this.toolboxInstance.close();
+    this.toolboxInstance?.close();
     this.Editor.BlockSettings.close();
   }
 
@@ -300,12 +335,8 @@ export default class Toolbar extends Module<ToolbarNodes> {
    *
    * @param {boolean} withBlockActions - by default, Toolbar opens with Block Actions.
    *                                     This flag allows to open Toolbar without Actions.
-   * @param {boolean} needToCloseToolbox - by default, Toolbar will be moved with opening
-   *                                      (by click on Block, or by enter)
-   *                                      with closing Toolbox and Block Settings
-   *                                      This flag allows to open Toolbar with Toolbox
    */
-  private open(withBlockActions = true, needToCloseToolbox = true): void {
+  private open(withBlockActions = true): void {
     _.delay(() => {
       this.nodes.wrapper.classList.add(this.CSS.toolbarOpened);
 
@@ -314,6 +345,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
       } else {
         this.blockActions.hide();
       }
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     }, 50)();
   }
 
@@ -322,6 +354,9 @@ export default class Toolbar extends Module<ToolbarNodes> {
    */
   private make(): void {
     this.nodes.wrapper = $.make('div', this.CSS.toolbar);
+    /**
+     * @todo detect test environment and add data-cy="toolbar" to use it in tests instead of class name
+     */
 
     /**
      * Make Content Zone and Actions Zone
@@ -341,8 +376,9 @@ export default class Toolbar extends Module<ToolbarNodes> {
      *  - Plus Button
      *  - Toolbox
      */
-    this.nodes.plusButton = $.make('div', this.CSS.plusButton);
-    $.append(this.nodes.plusButton, $.svg('plus', 16, 16));
+    this.nodes.plusButton = $.make('div', this.CSS.plusButton, {
+      innerHTML: IconPlus,
+    });
     $.append(this.nodes.actions, this.nodes.plusButton);
 
     this.readOnlyMutableListeners.on(this.nodes.plusButton, 'click', () => {
@@ -372,22 +408,6 @@ export default class Toolbar extends Module<ToolbarNodes> {
      */
     this.nodes.settingsToggler = $.make('span', this.CSS.settingsToggler);
 
-
-    // delete after
-    // const settingsIcon = $.svg('dots', 8, 8);
-
-    ////this.nodes.settingsToggler.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-      '<path d="M15.4141 6.58588C16.1952 7.36693 16.1952 8.63326 15.4141 9.41431C14.6331 10.1954 13.3668 10.1954 12.5857 9.41431C11.8047 8.63326 11.8047 7.36693 12.5857 6.58588C13.3668 5.80483 14.6331 5.80483 15.4141 6.58588Z" fill="#9293AD"/>' +
-      '<path d="M9.41423 6.58588C10.1953 7.36693 10.1953 8.63326 9.41423 9.41431C8.63318 10.1954 7.36686 10.1954 6.58581 9.41431C5.80477 8.63326 5.80477 7.36693 6.58581 6.58588C7.36686 5.80483 8.63318 5.80483 9.41423 6.58588Z" fill="#9293AD"/>' +
-      '<path d="M3.41424 6.58588C4.19528 7.36693 4.19528 8.63326 3.41424 9.41431C2.63319 10.1954 1.36686 10.1954 0.585815 9.41431C-0.195231 8.63326 -0.195231 7.36693 0.585815 6.58588C1.36686 5.80483 2.63319 5.80483 3.41424 6.58588Z" fill="#9293AD"/>' +
-      '</svg>';
-
-    // delete after
-    // $.append(this.nodes.settingsToggler, settingsIcon);
-
-    ////$.append(this.nodes.blockActionsButtons, this.nodes.settingsToggler);
-    ////$.append(this.nodes.actions, this.nodes.blockActionsButtons);
-
     const settingsIcon = $.svg('threedots', 16, 16);
 
     $.append(this.nodes.settingsToggler, settingsIcon);
@@ -405,7 +425,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
      * Appending Toolbar components to itself
      */
     $.append(this.nodes.actions, this.makeToolbox());
-    $.append(this.nodes.actions, this.Editor.BlockSettings.nodes.wrapper);
+    $.append(this.nodes.actions, this.Editor.BlockSettings.getElement());
 
     /**
      * Append toolbar to the Editor
@@ -424,8 +444,8 @@ export default class Toolbar extends Module<ToolbarNodes> {
       api: this.Editor.API.methods,
       tools: this.Editor.Tools.blockTools,
       i18nLabels: {
-        filter: I18n.ui(I18nInternalNS.ui.toolbar.toolbox, 'Filter'),
-        nothingFound: I18n.ui(I18nInternalNS.ui.toolbar.toolbox, 'Nothing found'),
+        filter: I18n.ui(I18nInternalNS.ui.popover, 'Filter'),
+        nothingFound: I18n.ui(I18nInternalNS.ui.popover, 'Nothing found'),
       },
     });
 
@@ -437,7 +457,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
       this.Editor.UI.nodes.wrapper.classList.remove(this.CSS.openedToolboxHolderModifier);
     });
 
-    this.toolboxInstance.on(ToolboxEvent.BlockAdded, ({ block }: {block: BlockAPI }) => {
+    this.toolboxInstance.on(ToolboxEvent.BlockAdded, ({ block }) => {
       const { BlockManager, Caret } = this.Editor;
       const newBlock = BlockManager.getBlockById(block.id);
 
@@ -467,7 +487,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
      */
     this.Editor.BlockManager.currentBlock = this.hoveredBlock;
 
-    this.toolboxInstance.toggle();
+    this.toolboxInstance?.toggle();
   }
 
   /**
@@ -489,13 +509,15 @@ export default class Toolbar extends Module<ToolbarNodes> {
 
       this.settingsTogglerClicked();
 
-      this.toolboxInstance.close();
+      if (this.toolboxInstance?.opened) {
+        this.toolboxInstance.close();
+      }
 
       this.tooltip.hide(true);
     }, true);
 
     /**
-     * Subscribe to the 'block-hovered' event if currenct view is not mobile
+     * Subscribe to the 'block-hovered' event if current view is not mobile
      *
      * @see https://github.com/codex-team/editor.js/issues/1972
      */
@@ -503,11 +525,11 @@ export default class Toolbar extends Module<ToolbarNodes> {
       /**
        * Subscribe to the 'block-hovered' event
        */
-      this.eventsDispatcher.on(this.Editor.UI.events.blockHovered, (data: {block: Block}) => {
+      this.eventsDispatcher.on(BlockHovered, (data) => {
         /**
          * Do not move toolbar if Block Settings or Toolbox opened
          */
-        if (this.Editor.BlockSettings.opened || this.toolboxInstance.opened) {
+        if (this.Editor.BlockSettings.opened || this.toolboxInstance?.opened) {
           return;
         }
 

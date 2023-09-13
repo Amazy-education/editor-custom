@@ -100,4 +100,19 @@
     animation: bounceIn 0.75s 1;
     animation-fill-mode: forwards;
   }
+
+  &__secondary-label {
+    color: var(--grayText);
+    font-size: 12px;
+    margin-left: auto;
+    white-space: nowrap;
+    letter-spacing: -0.1em;
+    padding-right: 5px;
+    margin-bottom: -2px;
+    opacity: 0.6;
+
+    @media (--mobile){
+      display: none;
+    }
+  }
 }

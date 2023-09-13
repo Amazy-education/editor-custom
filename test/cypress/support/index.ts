@@ -7,11 +7,26 @@
  */
 
 import '@cypress/code-coverage/support';
+import installLogsCollector from 'cypress-terminal-report/src/installLogsCollector';
+
+installLogsCollector();
 
 /**
  * File with the helpful commands
  */
 import './commands';
+
+/**
+ * File with custom assertions
+ */
+import './e2e';
+
+import chaiSubset from 'chai-subset';
+
+/**
+ * "containSubset" object properties matcher
+ */
+chai.use(chaiSubset);
 
 /**
  * Before-each hook for the cypress tests

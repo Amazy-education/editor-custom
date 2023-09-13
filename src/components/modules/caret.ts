@@ -3,9 +3,7 @@
  * @classdesc Contains methods for working Caret
  *
  * Uses Range methods to manipulate with caret
- *
  * @module Caret
- *
  * @version 2.0.0
  */
 
@@ -110,7 +108,7 @@ export default class Caret extends Module {
          * Workaround case when block starts with several <br>'s (created by SHIFT+ENTER)
          *
          * @see https://github.com/codex-team/editor.js/issues/726
-         * We need to allow to delete such linebreaks, so in this case caret IS NOT AT START
+         * We need to allow to delete such line breaks, so in this case caret IS NOT AT START
          */
         const regularLineBreak = $.isLineBreakTag(node);
         /**
@@ -162,7 +160,7 @@ export default class Caret extends Module {
      * In this case, anchor node has ELEMENT_NODE node type.
      * Anchor offset shows amount of children between start of the element and caret position.
      *
-     * So we use child with anchofocusOffset - 1 as new focusNode.
+     * So we use child with focusOffset - 1 as new focusNode.
      */
     let focusOffset = selection.focusOffset;
 
@@ -262,6 +260,7 @@ export default class Caret extends Module {
      */
     _.delay(() => {
       this.set(nodeToSet as HTMLElement, offset);
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     }, 20)();
 
     BlockManager.setCurrentBlockByChildNode(block.holder);
@@ -504,12 +503,10 @@ export default class Caret extends Module {
 
     sel.expandToTag(shadowCaret as HTMLElement);
 
-    setTimeout(() => {
-      const newRange = document.createRange();
+    const newRange = document.createRange();
 
-      newRange.selectNode(shadowCaret);
-      newRange.extractContents();
-    }, 50);
+    newRange.selectNode(shadowCaret);
+    newRange.extractContents();
   }
 
   /**
@@ -534,7 +531,7 @@ export default class Caret extends Module {
       fragment.appendChild(new Text());
     }
 
-    const lastChild = fragment.lastChild;
+    const lastChild = fragment.lastChild as ChildNode;
 
     range.deleteContents();
     range.insertNode(fragment);
@@ -542,14 +539,18 @@ export default class Caret extends Module {
     /** Cross-browser caret insertion */
     const newRange = document.createRange();
 
-    newRange.setStart(lastChild, lastChild.textContent.length);
+    const nodeToSetCaret = lastChild.nodeType === Node.TEXT_NODE ? lastChild : lastChild.firstChild;
+
+    if (nodeToSetCaret !== null && nodeToSetCaret.textContent !== null) {
+      newRange.setStart(nodeToSetCaret, nodeToSetCaret.textContent.length);
+    }
 
     selection.removeAllRanges();
     selection.addRange(newRange);
   }
 
   /**
-   * Get all first-level (first child of [contenteditabel]) siblings from passed node
+   * Get all first-level (first child of [contenteditable]) siblings from passed node
    * Then you can check it for emptiness
    *
    * @example
@@ -562,10 +563,8 @@ export default class Caret extends Module {
    * <p></p>                            | right first-level siblings
    * <p></p>                            |
    * </div>
-   *
    * @param {HTMLElement} from - element from which siblings should be searched
    * @param {'left' | 'right'} direction - direction of search
-   *
    * @returns {HTMLElement[]}
    */
   private getHigherLevelSiblings(from: HTMLElement, direction?: 'left' | 'right'): HTMLElement[] {
