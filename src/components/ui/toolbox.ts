@@ -5,6 +5,8 @@ import BlockTool from '../tools/block';
 import ToolsCollection from '../tools/collection';
 import { API, BlockAPI, BlockToolData, PopoverItem, ToolboxConfigEntry } from '../../../types';
 import EventsDispatcher from '../utils/events';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import Popover, { PopoverEvent } from '../utils/popover';
 import I18n from '../i18n';
 import { I18nInternalNS } from '../i18n/namespace-internal';

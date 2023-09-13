@@ -76,12 +76,12 @@ export default class LinkInlineTool implements InlineTool {
     cleanButton: HTMLSpanElement;
     confirmButton: HTMLSpanElement;
   } = {
-    button: null,
-    input: null,
-    label: null,
-    cleanButton: null,
-    confirmButton: null,
-  };
+      button: null,
+      input: null,
+      label: null,
+      cleanButton: null,
+      confirmButton: null,
+    };
 
   /**
    * SelectionUtils instance
@@ -366,7 +366,8 @@ export default class LinkInlineTool implements InlineTool {
       });
       setTimeout(() => {
         this.tooltip.hide();
-      }, 1000);
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+      }, 999);
 
       _.log('Incorrect Link pasted', 'warn', value);
 

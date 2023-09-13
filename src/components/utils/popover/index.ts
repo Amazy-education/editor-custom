@@ -1,6 +1,6 @@
 import { PopoverItem } from './popover-item';
 import Dom from '../../dom';
-import { cacheable, keyCodes, isMobileScreen } from '../../utils';
+import { cacheable, isMobileScreen, keyCodes } from '../../utils';
 import Flipper from '../../flipper';
 import { PopoverItem as PopoverItemParams } from '../../../../types';
 import SearchInput from './search-input';

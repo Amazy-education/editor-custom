@@ -48,6 +48,7 @@ export default class BlockManager extends Module {
 
   /**
    * Sets unfocus callback
+   *
    * @param callback
    */
   public set unfocusCallback(callback) {
@@ -57,6 +58,7 @@ export default class BlockManager extends Module {
   /**
    * Call unfocus callback
    */
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public callUnfocusCallback() {
     // console.log('block manager call UnfocusCallback');
 
@@ -182,6 +184,7 @@ export default class BlockManager extends Module {
    *
    * @type {number}
    */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   private _currentBlockIndex = -1;
 
   /**
@@ -189,6 +192,7 @@ export default class BlockManager extends Module {
    *
    * @type {number}
    */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   private _unfocusCallback = null;
 
   /**
@@ -197,6 +201,7 @@ export default class BlockManager extends Module {
    * @type {Proxy}
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   private _blocks: Blocks = null;
 
   /**
@@ -257,8 +262,6 @@ export default class BlockManager extends Module {
    * @param {string} options.tool - tools passed in editor config {@link EditorConfig#tools}
    * @param {string} [options.id] - unique id for this block
    * @param {BlockToolData} [options.data] - constructor params
-   * @param {function} addBlockButtonClick - add block button click callback
-   * @param {function} onFocusBlock - focus block button click callback
    *
    * @returns {Block}
    */
@@ -266,16 +269,10 @@ export default class BlockManager extends Module {
     tool: name,
     data = {},
     id,
-    tunes: tunesData = {}
-    , addBlockButtonClick = null
-    , onFocusBlock = null
+    tunes: tunesData = {},
   }: {tool: string; id?: string; data?: BlockToolData; tunes?: {[name: string]: BlockTuneData}, addBlockButtonClick?, onFocusBlock?}): Block {
     const readOnly = this.Editor.ReadOnly.isEnabled;
     const tool = this.Editor.Tools.blockTools.get(name);
-
-    if (this.config.addBlockButtonClick) {
-      addBlockButtonClick = this.config.addBlockButtonClick;
-    }
 
     const block = new Block({
       id,
@@ -284,8 +281,6 @@ export default class BlockManager extends Module {
       api: this.Editor.API,
       readOnly,
       tunesData,
-      addBlockButtonClick,
-      onFocusBlock,
     }, this.eventsDispatcher);
 
     if (!readOnly) {
@@ -846,6 +841,8 @@ export default class BlockManager extends Module {
      * Force call of didMutated event on Block movement
      */
     this.blockDidMutated(BlockMovedMutationType, this.currentBlock, {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       fromIndex,
       toIndex,
     });
@@ -1027,10 +1024,15 @@ export default class BlockManager extends Module {
    * @param block - mutated block
    * @param detailData - additional data to pass with change event
    */
-  private blockDidMutated<Type extends BlockMutationType>(mutationType: Type, block: Block, detailData: BlockMutationEventDetailWithoutTarget<Type>): Block {
+  private blockDidMutated<Type extends BlockMutationType>(mutationType: string, block: Block, detailData: {
+    index: number,
+    trigger?: string
+  }): Block {
     const event = new CustomEvent(mutationType, {
       detail: {
         target: new BlockAPI(block),
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         ...detailData as BlockMutationEventDetailWithoutTarget<Type>,
       },
     });

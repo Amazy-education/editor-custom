@@ -73,7 +73,7 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
       ...(this.isRtl ? [ this.Editor.UI.CSS.editorRtlFix ] : []),
     ]);
     this.nodes.tools = $.make('div', ConversionToolbar.CSS.conversionToolbarTools);
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
     const label = $.make('div', ConversionToolbar.CSS.conversionToolbarLabel, {
       textContent: I18n.ui(I18nInternalNS.ui.inlineToolbar.converter, 'Convert to'),
     });
@@ -246,7 +246,11 @@ export default class ConversionToolbar extends Module<ConversionToolbarNodes> {
   private addTool(toolName: string, toolboxItem: ToolboxConfigEntry): void {
     const tool = $.make('div', [ ConversionToolbar.CSS.conversionTool ]);
     const icon = $.make('div', [ ConversionToolbar.CSS.conversionToolIcon ]);
-    const selectIcon = $.svg('tick', 20, 20);
+    const selectIcon = $.make('span');
+
+    selectIcon.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M17.7992 7.60488C18.2936 8.04628 18.3365 8.80486 17.8951 9.29923L11.6451 16.2992C11.4175 16.5542 11.0918 16.7 10.75 16.7C10.4082 16.7 10.0826 16.5542 9.85488 16.2992L6.10488 12.0992C5.66349 11.6049 5.70643 10.8463 6.20079 10.4049C6.69515 9.96349 7.45374 10.0064 7.89514 10.5008L10.75 13.6983L16.1049 7.70079C16.5463 7.20643 17.3049 7.16349 17.7992 7.60488Z" fill="#04003D"/>
+</svg>`;
 
     tool.dataset.tool = toolName;
     icon.innerHTML = toolboxItem.icon;

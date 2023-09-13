@@ -18,6 +18,16 @@ export interface ToolboxConfigEntry {
   title?: string;
 
   /**
+   * Tool name for Toolbox
+   */
+  name?: string;
+
+  /**
+   * Tool description for Toolbox
+   */
+  description?: string;
+
+  /**
    * HTML string with an icon for Toolbox
    */
   icon?: string;

@@ -7,7 +7,7 @@ import Tooltip from '../../utils/tooltip';
 import { ModuleConfig } from '../../../types-internal/module-config';
 import Block from '../../block';
 import Toolbox, { ToolboxEvent } from '../../ui/toolbox';
-import { IconMenu, IconPlus } from '@codexteam/icons';
+import { IconPlus } from '@codexteam/icons';
 import { BlockHovered } from '../../events/BlockHovered';
 
 /**
@@ -408,7 +408,11 @@ export default class Toolbar extends Module<ToolbarNodes> {
      */
     this.nodes.settingsToggler = $.make('span', this.CSS.settingsToggler);
 
-    const settingsIcon = $.svg('threedots', 16, 16);
+    const settingsIcon = $.make('span');
+
+    settingsIcon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M7.41421 13.4142C8.19525 12.6332 8.19525 11.3668 7.41421 10.5858C6.63316 9.80474 5.36683 9.80474 4.58578 10.5858C3.80474 11.3668 3.80474 12.6332 4.58578 13.4142C5.36683 14.1953 6.63316 14.1953 7.41421 13.4142ZM13.4142 10.5858C14.1952 11.3668 14.1952 12.6332 13.4142 13.4142C12.6332 14.1953 11.3668 14.1953 10.5858 13.4142C9.80474 12.6332 9.80474 11.3668 10.5858 10.5858C11.3668 9.80474 12.6332 9.80474 13.4142 10.5858ZM19.4142 10.5858C20.1953 11.3668 20.1953 12.6332 19.4142 13.4142C18.6332 14.1953 17.3668 14.1953 16.5858 13.4142C15.8047 12.6332 15.8047 11.3668 16.5858 10.5858C17.3668 9.80474 18.6332 9.80474 19.4142 10.5858Z" fill="currentColor"/>
+      </svg>`;
 
     $.append(this.nodes.settingsToggler, settingsIcon);
     $.append(this.nodes.actions, this.nodes.settingsToggler);

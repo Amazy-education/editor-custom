@@ -27,11 +27,6 @@ import { EditorEventMap, FakeCursorAboutToBeToggled, FakeCursorHaveBeenSet, Reda
 import { RedactorDomChangedPayload } from '../events/RedactorDomChanged';
 import { convertBlockDataToString } from '../utils/blocks';
 
-import {isNumber} from '../utils';
-
-type AddBlockButtonClickInterface = (index: number) => void;
-type OnFocusBlockInterface = (index: number, unfocusCallback: object) => void;
-
 /**
  * Interface describes Block class constructor argument
  */

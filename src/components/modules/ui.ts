@@ -13,6 +13,8 @@ import Block from '../block';
 import Flipper from '../flipper';
 import { mobileScreenBreakpoint } from '../utils';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import styles from '../../styles/main.css?inline';
 import { BlockHovered } from '../events/BlockHovered';
 /**
