@@ -30,6 +30,7 @@ export default class ModificationsObserver extends Module {
    * @param event - some of our custom change events
    */
   public onChange(event: CustomEvent): void {
+    console.log('EDITOR CONFIG', this.config);
     if (this.disabled || !_.isFunction(this.config.onChange)) {
       return;
     }
