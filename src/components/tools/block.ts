@@ -204,11 +204,11 @@ export default class BlockTool extends BaseTool<IBlockTool> {
 
     Array
       .from(this.inlineTools.values())
-      .forEach(tool => Object.assign(baseConfig, tool.sanitizeConfig));
+      .forEach(tool => Object.assign(baseConfig, tool?.sanitizeConfig));
 
     Array
       .from(this.tunes.values())
-      .forEach(tune => Object.assign(baseConfig, tune.sanitizeConfig));
+      .forEach(tune => Object.assign(baseConfig, tune?.sanitizeConfig));
 
     return baseConfig;
   }
