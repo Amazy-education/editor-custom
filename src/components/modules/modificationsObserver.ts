@@ -31,10 +31,10 @@ export default class ModificationsObserver extends Module {
    */
   public onChange(event: CustomEvent): void {
     console.log('EDITOR CONFIG', this.config);
-    if (this.disabled || !_.isFunction(this.config.onChange)) {
+    if (this.disabled && !this.config.readOnlySave || !_.isFunction(this.config.onChange)) {
       return;
     }
-
+    console.log('editor saved')
     this.config.onChange(this.Editor.API.methods, event);
   }
 }
